@@ -23,14 +23,7 @@ import (
 	"github.com/gdamore/tcell/v3"
 )
 
-func draw(s tcell.Screen, remain int) {
-	style := tcell.StyleDefault
-	s.Clear()
-	s.PutStrStyled(1, 1, fmt.Sprintf("Beep will occur in %d seconds...", remain), style)
-	s.PutStrStyled(1, 3, "Press ESC or CTRL-Q to quit, B to beep now.", style.Italic(true))
-
-	s.Show()
-}
+func draw(s tcell.Screen, remain int) { _ = "STUB: not implemented"; return }
 
 func main() {
 	s, e := tcell.NewScreen()

@@ -32,77 +32,20 @@ import (
 
 var defStyle tcell.Style
 
-func isCtrlRune(ev *tcell.EventKey, r string) bool {
-	return ev.Key() == tcell.KeyRune && ev.Str() == r && ev.Modifiers()&tcell.ModCtrl != 0
-}
+func isCtrlRune(ev *tcell.EventKey, r string) bool { _ = "STUB: not implemented"; return false }
 
-func keyboardProtocolName(p tcell.KeyProtocol) string {
-	switch p {
-	case tcell.LegacyKeyboard:
-		return "Legacy"
-	case tcell.KittyKeyboard:
-		return "Kitty"
-	case tcell.Win32Keyboard:
-		return "Win32"
-	case tcell.XTermKeyboard:
-		return "XTerm"
-	default:
-		return "Unknown"
-	}
-}
+func keyboardProtocolName(p tcell.KeyProtocol) string { _ = "STUB: not implemented"; return "" }
 
 func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, r rune) {
-	rs := string(r)
-
-	if y2 < y1 {
-		y1, y2 = y2, y1
-	}
-	if x2 < x1 {
-		x1, x2 = x2, x1
-	}
-
-	for col := x1; col <= x2; col++ {
-		s.Put(col, y1, string(tcell.RuneHLine), style)
-		s.Put(col, y2, string(tcell.RuneHLine), style)
-	}
-	for row := y1 + 1; row < y2; row++ {
-		s.Put(x1, row, string(tcell.RuneVLine), style)
-		s.Put(x2, row, string(tcell.RuneVLine), style)
-	}
-	if y1 != y2 && x1 != x2 {
-		// Only add corners if we need to
-		s.Put(x1, y1, string(tcell.RuneULCorner), style)
-		s.Put(x2, y1, string(tcell.RuneURCorner), style)
-		s.Put(x1, y2, string(tcell.RuneLLCorner), style)
-		s.Put(x2, y2, string(tcell.RuneLRCorner), style)
-	}
-	for row := y1 + 1; row < y2; row++ {
-		for col := x1 + 1; col < x2; col++ {
-			s.Put(col, row, rs, style)
-		}
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
-func drawSelect(s tcell.Screen, x1, y1, x2, y2 int, sel bool) {
+// Only add corners if we need to
 
-	if y2 < y1 {
-		y1, y2 = y2, y1
-	}
-	if x2 < x1 {
-		x1, x2 = x2, x1
-	}
-	for row := y1; row <= y2; row++ {
-		for col := x1; col <= x2; col++ {
-			str, style, width := s.Get(col, row)
-			if style == tcell.StyleDefault {
-				style = defStyle
-			}
-			style = style.Reverse(sel)
-			s.Put(col, row, str, style)
-			col += width - 1 // add an extra column if 2 cells
-		}
-	}
-}
+func drawSelect(s tcell.Screen, x1, y1, x2, y2 int, sel bool) { _ = "STUB: not implemented"; return }
+
+// add an extra column if 2 cells
 
 // This program just shows simple mouse and keyboard events.  Press ESC twice to
 // exit.

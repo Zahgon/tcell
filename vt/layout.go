@@ -15,7 +15,6 @@
 package vt
 
 import (
-	"sort"
 	"sync"
 	"time"
 )
@@ -62,34 +61,13 @@ type KeyboardState struct {
 }
 
 // initialize the keyboard, lazily.
-func (ks *KeyboardState) initialize() {
-	if !ks.initialized {
-		ks.pressed = make(map[Key]bool)
-		if ks.layout == nil {
-			ks.layout = KeyboardANSI
-		}
-		ks.repeatDelay = time.Millisecond * 250
-		ks.repeatInterval = time.Millisecond * 30
-		ks.initialized = true
-	}
-}
+func (ks *KeyboardState) initialize() { _ = "STUB: not implemented"; return }
 
 // reset the keyboard state.
-func (ks *KeyboardState) reset() {
-	ks.clearRepeat()
-	ks.mod = 0
-	ks.deadKey = nil
-	ks.pressed = make(map[Key]bool)
-}
+func (ks *KeyboardState) reset() { _ = "STUB: not implemented"; return }
 
 // clear repeat clears any repeating key.
-func (ks *KeyboardState) clearRepeat() {
-	ks.repeating = false
-	ks.repeatStart = time.Time{}
-	ks.repeatTime = time.Time{}
-	ks.lastRune = 0
-	ks.lastKey = 0
-}
+func (ks *KeyboardState) clearRepeat() { _ = "STUB: not implemented"; return }
 
 // SetRepeat sets the repeat parameters. Note that this will only have any meaningful
 // impact if the caller calls the Pressed function repeatedly (periodically) while
@@ -101,154 +79,35 @@ func (ks *KeyboardState) clearRepeat() {
 // The caller should usually call this before processing keyboard events.  It must
 // not be called concurrently with either of the Pressed or Release functions.
 func (ks *KeyboardState) SetRepeat(delay time.Duration, interval time.Duration) {
-	ks.initialize()
-	ks.repeatDelay = delay
-	ks.repeatInterval = interval
-	ks.clearRepeat()
+	_ = "STUB: not implemented"
+	return
 }
 
 // SetLayout sets the layout this keyboard should use.
 // This also resets the keyboard state.
-func (ks *KeyboardState) SetLayout(km *Layout) {
-	ks.initialize()
-	ks.reset()
-	ks.layout = km
-}
+func (ks *KeyboardState) SetLayout(km *Layout) { _ = "STUB: not implemented"; return }
 
 // Pressed should be called when a given key is depressed.
-func (ks *KeyboardState) Pressed(k Key) *KeyEvent {
-	ks.initialize()
-	event := &KeyEvent{
-		Down: true,
-		Key:  k,
-		SC:   k.ScanCode(),
-		Base: k.KittyBase(),
-		Mod:  ks.mod,
-	}
-	// if another key was pressed, then clear the repeat state
-	lastKey := ks.lastKey
-	if lastKey != k && ks.repeatInterval != 0 {
-		ks.clearRepeat()
-		ks.repeatStart = time.Now().Add(ks.repeatDelay)
-		ks.repeatTime = ks.repeatStart
-	}
-	wasPressed := ks.pressed[k]
-	ks.pressed[k] = true
-	ks.lastKey = k
+func (ks *KeyboardState) Pressed(k Key) *KeyEvent { _ = "STUB: not implemented"; return nil }
 
-	l := ks.layout
-	event.VK = l.Virtual[k]
-	if mod, ok := l.Locking[k]; ok {
-		// locking modifiers never repeat
-		if wasPressed {
-			return nil
-		}
-		if ks.mod&mod == 0 {
-			ks.mod |= mod
-		} else {
-			ks.mod &^= mod
-		}
-		ks.pressed[k] = true
-		event.Mod = ks.mod
-		return event
-	}
-	if mod, ok := l.Modifiers[k]; ok {
-		if wasPressed {
-			return nil
-		}
-		ks.mod |= mod
-		event.Mod = ks.mod
-		return event
-	}
+// if another key was pressed, then clear the repeat state
 
-	// attempt to look up the rune for this
-	r := l.KeyToUTF(k, ks.mod)
-	if ks.deadKey == nil && l.DeadKeys != nil && r != 0 {
-		if dk, ok := l.DeadKeys[r]; ok {
-			ks.deadKey = dk.Next
-			return event
-		}
-	}
+// locking modifiers never repeat
 
-	if dk := ks.deadKey; dk != nil {
-		if n, ok := dk[r]; ok {
-			if n.U != 0 {
-				event.Utf = string(n.U)
-				ks.lastRune = n.U
-				ks.deadKey = nil
-			} else {
-				ks.deadKey = n.Next
-			}
-			return event
-		}
-		// failed lookup - ignore it
-		ks.deadKey = nil
-	}
+// attempt to look up the rune for this
 
-	if r != 0 {
-		event.Utf = string(r)
-	}
+// failed lookup - ignore it
 
-	if lastKey == k && wasPressed && ks.repeatInterval > 0 {
-		ks.repeating = true
-		if time.Now().After(ks.repeatStart) {
-			deltaT := time.Since(ks.repeatTime).Truncate(ks.repeatInterval)
-			event.Repeat = int(deltaT / ks.repeatInterval)
-			if ks.repeatTime == ks.repeatStart {
-				// fence post - count the first one!
-				event.Repeat++
-			}
-			ks.repeatTime = ks.repeatTime.Add(deltaT)
-			// if we polled before the repeat interval then report nothing
-			if event.Repeat == 0 {
-				return nil
-			}
-		}
-	}
+// fence post - count the first one!
 
-	return event
-}
+// if we polled before the repeat interval then report nothing
 
 // Released should be called when a given key is Released.
-func (ks *KeyboardState) Released(k Key) *KeyEvent {
-	ks.initialize()
-	event := &KeyEvent{
-		Down: false,
-		Key:  k,
-		SC:   k.ScanCode(),
-		Base: k.KittyBase(),
-		Mod:  ks.mod,
-	}
-	if ks.lastKey == k {
-		ks.clearRepeat()
-	}
-	wasPressed := ks.pressed[k]
-	delete(ks.pressed, k)
+func (ks *KeyboardState) Released(k Key) *KeyEvent { _ = "STUB: not implemented"; return nil }
 
-	l := ks.layout
-	event.VK = l.Virtual[k]
+// something weird
 
-	if mod, ok := ks.layout.Modifiers[k]; ok {
-		if !wasPressed {
-			// something weird
-			return nil
-		}
-		ks.mod &^= mod
-
-		event.Mod = ks.mod
-		return event
-	}
-
-	if _, ok := ks.layout.Locking[k]; !ok {
-		if r := l.KeyToUTF(k, ks.mod); r != 0 {
-			event.Utf = string(r)
-		}
-	}
-
-	// no real point in looking up UTF for key release, so we don't
-
-	return event
-}
+// no real point in looking up UTF for key release, so we don't
 
 // DeadKey is what happens when a dead key is pressed.  Either it starts an unresolved sequence,
 // (in which case Next will be non-nil), or it resolves to a final rune (in which case U will be non-zero)
@@ -300,20 +159,7 @@ type Layout struct {
 	Maps []ModifierMap
 }
 
-func (km *Layout) KeyToUTF(k Key, m Modifier) rune {
-	for _, mm := range km.Maps {
-		if mm.When != nil && !mm.When(m) {
-			continue
-		}
-		if u, ok := mm.Map[k]; ok {
-			return u
-		}
-	}
-	if km.Base != nil {
-		return km.Base.KeyToUTF(k, m)
-	}
-	return 0
-}
+func (km *Layout) KeyToUTF(k Key, m Modifier) rune { _ = "STUB: not implemented"; return 0 }
 
 // KeysUsLower is a list of lower case key maps.
 var KeysUsLower = map[Key]rune{
@@ -685,29 +531,12 @@ var allLayouts = map[string]*Layout{
 var layoutsLock sync.Mutex
 
 // RegisterLayout registers the given layout.
-func RegisterLayout(km *Layout) {
-	layoutsLock.Lock()
-	allLayouts[km.Name] = km
-	layoutsLock.Unlock()
-}
+func RegisterLayout(km *Layout) { _ = "STUB: not implemented"; return }
 
 // GetLayout returns a keyboard layout for the given name.
 // The layout must have been previously registered with RegisterLayout.
 // (Builtin layouts do this as a consequence of importing the layout.)
-func GetLayout(name string) *Layout {
-	layoutsLock.Lock()
-	defer layoutsLock.Unlock()
-	return allLayouts[name]
-}
+func GetLayout(name string) *Layout { _ = "STUB: not implemented"; return nil }
 
 // Layouts returns a list of all known layout names.
-func Layouts() []string {
-	layoutsLock.Lock()
-	defer layoutsLock.Unlock()
-	res := make([]string, 0, len(allLayouts))
-	for k := range allLayouts {
-		res = append(res, k)
-	}
-	sort.Strings(res)
-	return res
-}
+func Layouts() []string { _ = "STUB: not implemented"; return nil }

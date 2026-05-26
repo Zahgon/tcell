@@ -33,18 +33,20 @@ type EventTime struct {
 
 // When returns the time stamp when the event occurred.
 func (e *EventTime) When() time.Time {
-	return e.when
+	_ = "STUB: not implemented"
+
+	// SetEventTime sets the time of occurrence for the event.
+	return *new(time.Time)
 }
 
-// SetEventTime sets the time of occurrence for the event.
 func (e *EventTime) SetEventTime(t time.Time) {
-	e.when = t
+	_ = "STUB: not implemented"
+
+	// SetEventNow sets the time of occurrence for the event to the current time.
+	return
 }
 
-// SetEventNow sets the time of occurrence for the event to the current time.
-func (e *EventTime) SetEventNow() {
-	e.SetEventTime(time.Now())
-}
+func (e *EventTime) SetEventNow() { _ = "STUB: not implemented"; return }
 
 // EventHandler is anything that handles events.  If the handler has
 // consumed the event, it should return true.  False otherwise.

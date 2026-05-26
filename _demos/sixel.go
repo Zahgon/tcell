@@ -22,10 +22,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/png"
-	"io"
 	"log"
-	"math"
 	"os"
 
 	"github.com/gdamore/tcell/v3"
@@ -41,68 +38,27 @@ type imageData struct {
 	data   *bytes.Buffer
 }
 
-func displayHelloWorld(s tcell.Screen) {
-	w, h := s.Size()
-	s.Clear()
-	style := tcell.StyleDefault.Foreground(color.CadetBlue.TrueColor()).Background(color.White)
-	s.PutStrStyled(w/2-7, h/2, "Hello, World!", style)
-	s.PutStr(w/2-9, h/2+1, "Press ESC to exit.")
-	s.PutStr(w/2-18, h/2+2, "Press Enter to toggle sixel lock.")
-	s.Show()
-}
+func displayHelloWorld(s tcell.Screen) { _ = "STUB: not implemented"; return }
 
-func displaySixel(s tcell.Screen, img *imageData, lock bool) {
-	tty, ok := s.Tty()
-	if !ok {
-		s.Fini()
-		log.Fatal("not a terminal")
-	}
-	ws, err := tty.WindowSize()
-	if err != nil {
-		s.Fini()
-		log.Fatal(err)
-	}
-	// Get the dimensions of a single cell
-	cw, ch := ws.CellDimensions()
-	if cw == 0 || ch == 0 {
-		s.Fini()
-		log.Fatal("terminal does not support sixel graphics")
-		return
-	}
+func displaySixel(s tcell.Screen, img *imageData, lock bool) { _ = "STUB: not implemented"; return }
 
-	// Calculate the image dimensions in cells. We round up to prevent
-	// drawing on a partially filled cell
-	sixelWidth := int(math.Ceil(float64(img.width) / float64(cw)))
-	sixelHeight := int(math.Ceil(float64(img.height) / float64(ch)))
+// Get the dimensions of a single cell
 
-	sixelX := ws.Width/2 - (sixelWidth / 2) // Center the image horizontally
-	sixelY := ws.Height/2 - sixelHeight - 2
-	if sixelY < 0 {
-		sixelY = 0
-	}
-	// Lock the region where we will draw the sixel, this prevents tcell
-	// from drawing over this area
-	s.LockRegion(sixelX, sixelY, sixelWidth, sixelHeight, lock)
+// Calculate the image dimensions in cells. We round up to prevent
+// drawing on a partially filled cell
 
-	s.PutStr(sixelX, sixelY, "This text is behind")
-	s.PutStr(sixelX, sixelY+1, "     the sixel")
+// Center the image horizontally
 
-	setCursorPosition = "\x1b[%[1]d;%[2]dH"
+// Lock the region where we will draw the sixel, this prevents tcell
+// from drawing over this area
 
-	// Move the cursor to our draw position
-	io.WriteString(tty, fmt.Sprintf(setCursorPosition, sixelY+1, sixelX+1))
-	// Draw the sixel data
-	io.WriteString(tty, img.data.String())
+// Move the cursor to our draw position
 
-	s.Show()
-}
+// Draw the sixel data
 
 func loadImage(path string) (image.Image, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	return png.Decode(f)
+	_ = "STUB: not implemented"
+	return *new(image.Image), nil
 }
 
 func main() {

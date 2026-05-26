@@ -265,32 +265,20 @@ var overrideOnce sync.Once
 // NewScreen returns a default Screen suitable for the user's terminal environment.
 // Any options are passed through to NewTerminfoScreen.
 func NewScreen(opts ...TerminfoScreenOption) (Screen, error) {
+	_ = "STUB: not implemented"
 
 	// Allow an application (presumably test code) to inject a replacement default
 	// screen.  This could also be used to create shims for things like nesting screens.
-	select {
-	case s := <-overrideScreen:
-		return s, nil
-	default:
-	}
-
-	if s, e := NewTerminfoScreen(opts...); s != nil {
-		return s, nil
-	} else {
-		return nil, e
-	}
+	return *new(Screen), nil
 }
 
 // ShimScreen allows an application to override the screen that will
 // be returned by NewScreen.  Typically this  is used for testing,
 // where the test code calls this once before running an example.
 // It could also be used to intercept a regular Screen.
-func ShimScreen(s Screen) {
-	overrideOnce.Do(func() {
-		overrideScreen = make(chan Screen, 8) // normally would only be one anyway
-	})
-	overrideScreen <- s
-}
+func ShimScreen(s Screen) { _ = "STUB: not implemented"; return }
+
+// normally would only be one anyway
 
 // MouseFlags are options to modify the handling of mouse events.
 // Actual events can be ORed together.
@@ -387,76 +375,37 @@ type baseScreen struct {
 }
 
 func (b *baseScreen) Put(x int, y int, str string, style Style) (remain string, width int) {
-	cells := b.GetCells()
-	b.Lock()
-	defer b.Unlock()
-	return cells.Put(x, y, str, style)
+	_ = "STUB: not implemented"
+	return "", 0
 }
 
 func (b *baseScreen) PutStrStyled(x int, y int, str string, style Style) {
-	cells := b.GetCells()
-	b.Lock()
-	defer b.Unlock()
-	cols, rows := cells.Size()
-	if cells.sanitizeContent {
-		str = stripOSCControlsIfNeeded(str)
-	}
-	width := 0
-	for str != "" && x < cols && y < rows {
-		str, width = cells.put(x, y, str, style)
-		if width == 0 {
-			break
-		}
-		x += width
-	}
+	_ = "STUB: not implemented"
+	return
 }
 
-func (b *baseScreen) PutStr(x, y int, str string) {
-	b.PutStrStyled(x, y, str, StyleDefault)
-}
+func (b *baseScreen) PutStr(x, y int, str string) { _ = "STUB: not implemented"; return }
 
-func (b *baseScreen) Clear() {
-	b.Fill(' ', StyleDefault)
-}
+func (b *baseScreen) Clear() { _ = "STUB: not implemented"; return }
 
-func (b *baseScreen) Fill(r rune, style Style) {
-	cb := b.GetCells()
-	b.Lock()
-	cb.Fill(r, style)
-	b.Unlock()
-}
+func (b *baseScreen) Fill(r rune, style Style) { _ = "STUB: not implemented"; return }
 
 func (b *baseScreen) SetContent(x, y int, mainc rune, combc []rune, style Style) {
-	b.Put(x, y, string(append([]rune{mainc}, combc...)), style)
+	_ = "STUB: not implemented"
+	return
 }
 
 func (b *baseScreen) Get(x, y int) (string, Style, int) {
-	cells := b.GetCells()
-	b.Lock()
-	defer b.Unlock()
-	return cells.Get(x, y)
+	_ = "STUB: not implemented"
+	return "", *new(Style), 0
 }
 
 func (b *baseScreen) LockRegion(x, y, width, height int, lock bool) {
-	cells := b.GetCells()
-	b.Lock()
-	for j := y; j < (y + height); j += 1 {
-		for i := x; i < (x + width); i += 1 {
-			switch lock {
-			case true:
-				cells.LockCell(i, j)
-			case false:
-				cells.UnlockCell(i, j)
-			}
-		}
-	}
-	b.Unlock()
+	_ = "STUB: not implemented"
+	return
 }
 
 func (b *baseScreen) SetCursorStyle(cs CursorStyle, ccs ...color.Color) {
-	if len(ccs) > 0 {
-		b.SetCursor(cs, ccs[0])
-	} else {
-		b.SetCursor(cs, ColorNone)
-	}
+	_ = "STUB: not implemented"
+	return
 }

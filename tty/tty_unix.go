@@ -18,15 +18,8 @@
 package tty
 
 import (
-	"errors"
-	"fmt"
 	"os"
-	"os/signal"
-	"strconv"
-	"syscall"
-	"time"
 
-	"golang.org/x/sys/unix"
 	"golang.org/x/term"
 )
 
@@ -43,181 +36,58 @@ type devTty struct {
 	started bool
 }
 
-func (tty *devTty) Read(b []byte) (int, error) {
-	return tty.f.Read(b)
-}
+func (tty *devTty) Read(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-func (tty *devTty) Write(b []byte) (int, error) {
-	return tty.f.Write(b)
-}
+func (tty *devTty) Write(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-func (tty *devTty) Close() error {
-	return tty.f.Close()
-}
+func (tty *devTty) Close() error { _ = "STUB: not implemented"; return nil }
 
-func (tty *devTty) Start() error {
+func (tty *devTty) Start() error { _ = "STUB: not implemented"; return nil }
 
-	if tty.started {
-		return nil
-	}
-	// We open another copy of /dev/tty.  This is a workaround for unusual behavior
-	// observed in macOS, apparently caused when a subshell (for example) closes our
-	// own tty device (when it exits for example).  Getting a fresh new one seems to
-	// resolve the problem.  (We believe this is a bug in the macOS tty driver that
-	// fails to account for dup() references to the same file before applying close()
-	// related behaviors to the tty.)  (Note that when using stdin/stdout instead of
-	// /dev/tty this problem is not observed.)
-	var err error
-	if tty.f, err = os.OpenFile(tty.dev, os.O_RDWR, 0); err != nil {
-		return err
-	}
+// We open another copy of /dev/tty.  This is a workaround for unusual behavior
+// observed in macOS, apparently caused when a subshell (for example) closes our
+// own tty device (when it exits for example).  Getting a fresh new one seems to
+// resolve the problem.  (We believe this is a bug in the macOS tty driver that
+// fails to account for dup() references to the same file before applying close()
+// related behaviors to the tty.)  (Note that when using stdin/stdout instead of
+// /dev/tty this problem is not observed.)
 
-	tty.fd = int(tty.f.Fd())
+// also sets vMin and vTime
 
-	if !term.IsTerminal(tty.fd) {
-		tty.f.Close()
-		return errors.New("device is not a terminal")
-	}
-
-	_ = tty.f.SetReadDeadline(time.Time{})
-	saved, err := term.MakeRaw(tty.fd) // also sets vMin and vTime
-	if err != nil {
-		tty.f.Close()
-		return err
-	}
-	if err = tcFlushInput(tty.fd); err != nil {
-		_ = term.Restore(tty.fd, saved)
-		tty.f.Close()
-		return err
-	}
-	tty.saved = saved
-	tty.started = true
-
-	return nil
-}
-
-func (tty *devTty) Drain() error {
-	_ = tty.f.SetReadDeadline(time.Now())
-	if err := tcSetBufParams(tty.fd, 0, 0); err != nil {
-		return err
-	}
-	return nil
-}
+func (tty *devTty) Drain() error { _ = "STUB: not implemented"; return nil }
 
 func (tty *devTty) Stop() error {
+	_ = "STUB: not implemented"
 	// unconditionally set this, because we cannot recover
 	// if we fail anyway, so this gives the best hope of
 	// picking up the pieces in such a circumstance
-	tty.started = false
-
-	if err := term.Restore(tty.fd, tty.saved); err != nil {
-		return err
-	}
-	_ = tty.f.SetReadDeadline(time.Now())
-
-	tty.NotifyResize(nil)
-
-	// close our tty device -- we'll get another one if we Start again later.
-	_ = tty.f.Close()
-	tty.fd = uninitializedTtyFd
-
 	return nil
 }
 
+// close our tty device -- we'll get another one if we Start again later.
+
 func (tty *devTty) WindowSize() (WindowSize, error) {
-	size := WindowSize{}
-	fd := tty.fd
-	if tty.fd == uninitializedTtyFd {
-		// If WindowSize is called when the tty isn't yet running, the fd for /dev/tty won't be initialized,
-		// so open the file just long enough to retrieve the window size.
-		f, err := os.OpenFile(tty.dev, os.O_RDWR, 0)
-		if err != nil {
-			return size, err
-		}
-		defer func() { _ = f.Close() }()
-		fd = int(f.Fd())
-	}
-
-	ws, err := unix.IoctlGetWinsize(fd, unix.TIOCGWINSZ)
-	if err != nil {
-		return size, err
-	}
-	w := int(ws.Col)
-	h := int(ws.Row)
-	if w == 0 {
-		w, _ = strconv.Atoi(os.Getenv("COLUMNS"))
-	}
-	if w == 0 {
-		w = 80 // default
-	}
-	if h == 0 {
-		h, _ = strconv.Atoi(os.Getenv("LINES"))
-	}
-	if h == 0 {
-		h = 25 // default
-	}
-	size.Width = w
-	size.Height = h
-	size.PixelWidth = int(ws.Xpixel)
-	size.PixelHeight = int(ws.Ypixel)
-	return size, nil
+	_ = "STUB: not implemented"
+	return *new(WindowSize), nil
 }
 
-func (tty *devTty) NotifyResize(resizeQ chan<- bool) {
+// If WindowSize is called when the tty isn't yet running, the fd for /dev/tty won't be initialized,
+// so open the file just long enough to retrieve the window size.
 
-	sigQ := tty.sig
-	tty.sig = nil
+// default
 
-	if sigQ != nil {
-		signal.Stop(sigQ)
-		close(sigQ)
-	}
+// default
 
-	if resizeQ == nil {
-		return
-	}
+func (tty *devTty) NotifyResize(resizeQ chan<- bool) { _ = "STUB: not implemented"; return }
 
-	sigQ = make(chan os.Signal, 1)
-	signal.Notify(sigQ, syscall.SIGWINCH)
-
-	tty.sig = sigQ
-
-	go func() {
-		for range sigQ {
-			select {
-			case resizeQ <- true:
-			default: // queue full, so nvm.
-			}
-		}
-	}()
-}
+// queue full, so nvm.
 
 // NewDevTty opens a /dev/tty based Tty.
-func NewDevTty() (Tty, error) {
-	return NewDevTtyFromDev("/dev/tty")
-}
+func NewDevTty() (Tty, error) { _ = "STUB: not implemented"; return *new(Tty), nil }
 
 // NewDevTtyFromDev opens a tty device given a path.  This can be useful to bind to other nodes.
-func NewDevTtyFromDev(dev string) (Tty, error) {
-	tty := &devTty{
-		fd:  uninitializedTtyFd,
-		dev: dev,
-		sig: make(chan os.Signal),
-	}
-	// Only open the file long enough to check that the device
-	// represents a TTY.  We will reopen it in start.  We do collect
-	// the terminal state so we can restore it later though.
-	if f, err := os.OpenFile(dev, os.O_RDWR, 0); err != nil {
-		return nil, err
-	} else {
-		defer func() { _ = f.Close() }()
-		fd := int(f.Fd())
-		if !term.IsTerminal(fd) {
-			return nil, errors.New("not a terminal")
-		}
-		if tty.saved, err = term.GetState(fd); err != nil {
-			return nil, fmt.Errorf("failed to get state: %w", err)
-		}
-	}
-	return tty, nil
-}
+func NewDevTtyFromDev(dev string) (Tty, error) { _ = "STUB: not implemented"; return *new(Tty), nil }
+
+// Only open the file long enough to check that the device
+// represents a TTY.  We will reopen it in start.  We do collect
+// the terminal state so we can restore it later though.

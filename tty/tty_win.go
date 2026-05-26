@@ -18,13 +18,8 @@
 package tty
 
 import (
-	"encoding/binary"
-	"errors"
 	"sync"
 	"syscall"
-	"time"
-	"unicode/utf16"
-	"unsafe"
 )
 
 var (
@@ -118,231 +113,58 @@ type winTty struct {
 }
 
 func (w *winTty) Read(b []byte) (int, error) {
+	_ = "STUB: not implemented"
 	// first character read blocks
-	var num int
-	select {
-	case c := <-w.buf:
-		b[0] = c
-		num++
-	case <-w.stopQ:
-		// stopping, so make sure we eat everything, which might require
-		// very short sleeps to ensure all buffered data is consumed.
-	}
-
-	// second character read is non-blocking
-	for ; num < len(b); num++ {
-		select {
-		case c := <-w.buf:
-			b[num] = c
-		case <-time.After(time.Millisecond * 10):
-			return num, nil
-		}
-	}
-	return num, nil
+	return 0, nil
 }
 
-func (w *winTty) Write(b []byte) (int, error) {
-	esc := utf16.Encode([]rune(string(b)))
-	if len(esc) > 0 {
-		err := syscall.WriteConsole(w.out, &esc[0], uint32(len(esc)), nil, nil)
-		if err != nil {
-			return 0, err
-		}
-	}
-	return len(b), nil
-}
+// stopping, so make sure we eat everything, which might require
+// very short sleeps to ensure all buffered data is consumed.
 
-func (w *winTty) Close() error {
-	_ = syscall.Close(w.in)
-	_ = syscall.Close(w.out)
-	return nil
-}
+// second character read is non-blocking
 
-func (w *winTty) Drain() error {
-	close(w.stopQ)
-	time.Sleep(time.Millisecond * 10)
-	_, _, _ = procSetEvent.Call(uintptr(w.cancelFlag))
-	return nil
-}
+func (w *winTty) Write(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
+
+func (w *winTty) Close() error { _ = "STUB: not implemented"; return nil }
+
+func (w *winTty) Drain() error { _ = "STUB: not implemented"; return nil }
 
 func (w *winTty) getConsoleInput() error {
+	_ = "STUB: not implemented"
 	// cancelFlag comes first as WaitForMultipleObjects returns the lowest index
 	// in the event that both events are signaled.
-	waitObjects := []syscall.Handle{w.cancelFlag, w.in}
-
-	// As arrays are contiguous in memory, a pointer to the first object is the
-	// same as a pointer to the array itself.
-	pWaitObjects := unsafe.Pointer(&waitObjects[0])
-
-	rv, _, er := procWaitForMultipleObjects.Call(
-		uintptr(len(waitObjects)),
-		uintptr(pWaitObjects),
-		uintptr(0),
-		w32Infinite)
-
-	// WaitForMultipleObjects returns WAIT_OBJECT_0 + the index.
-	switch rv {
-	case w32WaitObject0: // w.cancelFlag
-		return errors.New("cancelled")
-	case w32WaitObject0 + 1: // w.in
-		var nrec int32
-		rv, _, er := procGetNumberOfConsoleInputEvents.Call(
-			uintptr(w.in),
-			uintptr(unsafe.Pointer(&nrec)))
-		if rv == 0 {
-			return er
-		}
-
-		rec := make([]inputRecord, max(nrec, 1))
-		rv, _, er = procReadConsoleInput.Call(
-			uintptr(w.in),
-			uintptr(unsafe.Pointer(&rec[0])),
-			uintptr(nrec),
-			uintptr(unsafe.Pointer(&nrec)))
-		if rv == 0 {
-			return er
-		}
-	loop:
-		for i := range nrec {
-			ir := rec[i]
-			switch ir.typ {
-			case keyEvent:
-				// we normally only expect to see ascii, but paste data may come in as UTF-16.
-				wc := rune(binary.LittleEndian.Uint16(ir.data[10:]))
-				for _, decoded := range decodeUTF16Rune(&w.surrogate, wc) {
-					for _, chr := range []byte(string(decoded)) {
-						// We normally expect only to see ASCII (win32-input-mode),
-						// but apparently pasted data can arrive in UTF-16 here.
-						select {
-						case w.buf <- chr:
-						case <-w.stopQ:
-							break loop
-						}
-					}
-				}
-
-			case resizeEvent:
-				w.Lock()
-				w.cols = binary.LittleEndian.Uint16(ir.data[0:])
-				w.rows = binary.LittleEndian.Uint16(ir.data[2:])
-				if w.resizeQ != nil {
-					select {
-					case w.resizeQ <- true:
-					default:
-					}
-				}
-				w.Unlock()
-
-			default:
-			}
-		}
-		return nil
-	default:
-		return er
-	}
-}
-
-func (w *winTty) scanInput() {
-	defer w.wg.Done()
-	for {
-		if e := w.getConsoleInput(); e != nil {
-			return
-		}
-	}
-}
-
-func (w *winTty) Start() error {
-
-	if w.running {
-		return nil
-	}
-	_, _, _ = procFlushConsoleInputBuffer.Call(uintptr(w.in))
-	w.stopQ = make(chan struct{})
-	cf, _, err := procCreateEvent.Call(
-		uintptr(0),
-		uintptr(1),
-		uintptr(0),
-		uintptr(0))
-	if cf == uintptr(0) {
-		return err
-	}
-	w.running = true
-	w.cancelFlag = syscall.Handle(cf)
-
-	_, _, _ = procSetConsoleMode.Call(uintptr(w.in),
-		uintptr(modeVtInput|modeResizeEn|modeExtendFlg))
-	_, _, _ = procSetConsoleMode.Call(uintptr(w.out),
-		uintptr(modeVtOutput|modeNoAutoNL|modeCookedOut|modeUnderline))
-
-	w.wg.Add(1)
-	go w.scanInput()
 	return nil
 }
 
-func (w *winTty) Stop() error {
-	w.wg.Wait()
-	_, _, _ = procSetConsoleMode.Call(uintptr(w.in), uintptr(w.oimode))
-	_, _, _ = procSetConsoleMode.Call(uintptr(w.out), uintptr(w.oomode))
-	_, _, _ = procFlushConsoleInputBuffer.Call(uintptr(w.in))
-	w.running = false
+// As arrays are contiguous in memory, a pointer to the first object is the
+// same as a pointer to the array itself.
 
-	return nil
-}
+// WaitForMultipleObjects returns WAIT_OBJECT_0 + the index.
 
-func (tty *winTty) NotifyResize(resizeQ chan<- bool) {
-	tty.Lock()
-	tty.resizeQ = resizeQ
-	tty.Unlock()
-}
+// w.cancelFlag
+
+// w.in
+
+// we normally only expect to see ascii, but paste data may come in as UTF-16.
+
+// We normally expect only to see ASCII (win32-input-mode),
+// but apparently pasted data can arrive in UTF-16 here.
+
+func (w *winTty) scanInput() { _ = "STUB: not implemented"; return }
+
+func (w *winTty) Start() error { _ = "STUB: not implemented"; return nil }
+
+func (w *winTty) Stop() error { _ = "STUB: not implemented"; return nil }
+
+func (tty *winTty) NotifyResize(resizeQ chan<- bool) { _ = "STUB: not implemented"; return }
 
 func (w *winTty) WindowSize() (WindowSize, error) {
-	w.Lock()
-	defer w.Unlock()
-	return WindowSize{Width: int(w.cols), Height: int(w.rows)}, nil
+	_ = "STUB: not implemented"
+	return *new(WindowSize), nil
 }
 
-func NewDevTty() (Tty, error) {
-	w := &winTty{}
-	var err error
-	w.in, err = syscall.Open("CONIN$", syscall.O_RDWR, 0)
-	if err != nil {
-		return nil, err
-	}
-	w.out, err = syscall.Open("CONOUT$", syscall.O_RDWR, 0)
-	if err != nil {
-		_ = syscall.Close(w.in)
-		return nil, err
-	}
-	w.buf = make(chan byte, 128)
+func NewDevTty() (Tty, error) { _ = "STUB: not implemented"; return *new(Tty), nil }
 
-	_, _, _ = procGetConsoleScreenBufferInfo.Call(uintptr(w.out), uintptr(unsafe.Pointer(&w.oscreen)))
-	_, _, _ = procGetConsoleMode.Call(uintptr(w.out), uintptr(unsafe.Pointer(&w.oomode)))
-	_, _, _ = procGetConsoleMode.Call(uintptr(w.in), uintptr(unsafe.Pointer(&w.oimode)))
-	w.rows = uint16(w.oscreen.size.y)
-	w.cols = uint16(w.oscreen.size.x)
+func NewDevTtyFromDev(dev string) (Tty, error) { _ = "STUB: not implemented"; return *new(Tty), nil }
 
-	return w, nil
-}
-
-func NewDevTtyFromDev(dev string) (Tty, error) {
-	return nil, errors.New("No tty device on Windows")
-}
-
-func NewStdIoTty() (Tty, error) {
-	w := &winTty{}
-	w.in = syscall.Stdin
-	w.out = syscall.Stdout
-	w.buf = make(chan byte, 128)
-
-	_, _, _ = procGetConsoleScreenBufferInfo.Call(uintptr(w.out), uintptr(unsafe.Pointer(&w.oscreen)))
-	if r, _, err := procGetConsoleMode.Call(uintptr(w.out), uintptr(unsafe.Pointer(&w.oomode))); r == 0 || err != nil {
-		return nil, errors.New("output is not a terminal")
-	}
-	if r, _, err := procGetConsoleMode.Call(uintptr(w.in), uintptr(unsafe.Pointer(&w.oimode))); r == 0 || err != nil {
-		return nil, errors.New("input is not a terminal")
-	}
-	w.rows = uint16(w.oscreen.size.y)
-	w.cols = uint16(w.oscreen.size.x)
-
-	return w, nil
-}
+func NewStdIoTty() (Tty, error) { _ = "STUB: not implemented"; return *new(Tty), nil }

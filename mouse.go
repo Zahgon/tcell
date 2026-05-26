@@ -40,28 +40,33 @@ type EventMouse struct {
 
 // Buttons returns the list of buttons that were pressed or wheel motions.
 func (ev *EventMouse) Buttons() ButtonMask {
-	return ev.btn
+	_ = "STUB: not implemented"
+
+	// Modifiers returns a list of keyboard modifiers that were pressed
+	// with the mouse button(s).
+	return *new(ButtonMask)
 }
 
-// Modifiers returns a list of keyboard modifiers that were pressed
-// with the mouse button(s).
 func (ev *EventMouse) Modifiers() ModMask {
-	return ev.mod
+	_ = "STUB: not implemented"
+
+	// Position returns the mouse position.  The origin 0, 0 is at the upper
+	// left corner.  The unit is character cells unless the screen was started
+	// with MousePixelEvents, in which case the unit is terminal pixels.
+	return *new(ModMask)
 }
 
-// Position returns the mouse position.  The origin 0, 0 is at the upper
-// left corner.  The unit is character cells unless the screen was started
-// with MousePixelEvents, in which case the unit is terminal pixels.
 func (ev *EventMouse) Position() (int, int) {
-	return ev.x, ev.y
+	_ = "STUB: not implemented"
+
+	// NewEventMouse is used to create a new mouse event.  Applications
+	// shouldn't need to use this; its mostly for screen implementers.
+	return 0, 0
 }
 
-// NewEventMouse is used to create a new mouse event.  Applications
-// shouldn't need to use this; its mostly for screen implementers.
 func NewEventMouse(x, y int, btn ButtonMask, mod ModMask) *EventMouse {
-	ev := &EventMouse{x: x, y: y, btn: btn, mod: mod}
-	ev.SetEventNow()
-	return ev
+	_ = "STUB: not implemented"
+	return nil
 }
 
 // ButtonMask is a mask of mouse buttons and wheel events.  Mouse button presses

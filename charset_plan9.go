@@ -18,6 +18,4 @@
 package tcell
 
 // Plan 9 uses UTF-8 system-wide, so we return "UTF-8" unconditionally.
-func getCharset() string {
-	return "UTF-8"
-}
+func getCharset() string { _ = "STUB: not implemented"; return "" }

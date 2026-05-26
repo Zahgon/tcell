@@ -46,20 +46,16 @@ type EventError struct {
 }
 
 // Error implements the error.
-func (ev *EventError) Error() string {
-	return ev.err.Error()
-}
+func (ev *EventError) Error() string { _ = "STUB: not implemented"; return "" }
 
 // Unwrap exposes the underlying error payload so callers can use
 // errors.Is / errors.As to match against sentinel values such as
 // io.EOF.
 func (ev *EventError) Unwrap() error {
-	return ev.err
+	_ = "STUB: not implemented"
+
+	// NewEventError creates an ErrorEvent with the given error payload.
+	return nil
 }
 
-// NewEventError creates an ErrorEvent with the given error payload.
-func NewEventError(err error) *EventError {
-	ev := &EventError{err: err}
-	ev.SetEventNow()
-	return ev
-}
+func NewEventError(err error) *EventError { _ = "STUB: not implemented"; return nil }

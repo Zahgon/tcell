@@ -23,9 +23,4 @@ type WindowSize struct {
 }
 
 // CellDimensions returns the dimensions of a single cell, in pixels
-func (ws WindowSize) CellDimensions() (int, int) {
-	if ws.PixelWidth == 0 || ws.PixelHeight == 0 {
-		return 0, 0
-	}
-	return (ws.PixelWidth / ws.Width), (ws.PixelHeight / ws.Height)
-}
+func (ws WindowSize) CellDimensions() (int, int) { _ = "STUB: not implemented"; return 0, 0 }

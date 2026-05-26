@@ -14,34 +14,6 @@
 
 package tty
 
-import (
-	"unicode/utf16"
-	"unicode/utf8"
-)
-
 // decodeUTF16Rune decodes one UTF-16 code unit at a time while preserving
 // malformed input as replacement characters instead of silently discarding it.
-func decodeUTF16Rune(surrogate *rune, wc rune) []rune {
-	switch {
-	case wc >= 0xD800 && wc <= 0xDBFF:
-		if *surrogate != 0 {
-			*surrogate = wc
-			return []rune{utf8.RuneError}
-		}
-		*surrogate = wc
-		return nil
-	case wc >= 0xDC00 && wc <= 0xDFFF:
-		if *surrogate == 0 {
-			return []rune{utf8.RuneError}
-		}
-		decoded := utf16.DecodeRune(*surrogate, wc)
-		*surrogate = 0
-		return []rune{decoded}
-	default:
-		if *surrogate != 0 {
-			*surrogate = 0
-			return []rune{utf8.RuneError, wc}
-		}
-		return []rune{wc}
-	}
-}
+func decodeUTF16Rune(surrogate *rune, wc rune) []rune { _ = "STUB: not implemented"; return nil }

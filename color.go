@@ -477,39 +477,27 @@ var ColorNames = color.Names
 // NewRGBColor returns a new color with the given red, green, and blue values.
 // Each value must be represented in the range 0-255.
 // Deprecated: Use color.NewRGBColor.
-func NewRGBColor(r, g, b int32) Color {
-	return color.NewRGBColor(r, g, b)
-}
+func NewRGBColor(r, g, b int32) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // NewHexColor returns a color using the given 24-bit RGB value.
 // Deprecated: Use color.NewHexColor.
-func NewHexColor(v int32) Color {
-	return color.NewHexColor(v)
-}
+func NewHexColor(v int32) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // GetColor creates a Color from a color name (W3C name). A hex value may
 // be supplied as a string in the format "#ffffff".
 // Deprecated: Use color.GetColor.
-func GetColor(name string) Color {
-	return color.GetColor(name)
-}
+func GetColor(name string) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // PaletteColor creates a color based on the palette index.
 // Deprecated: Use color.PaletteColor.
-func PaletteColor(index int) Color {
-	return color.PaletteColor(index)
-}
+func PaletteColor(index int) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // FromImageColor converts an image/color.Color into Color.
 // Deprecated: Use color.FromImageColor.
-func FromImageColor(imageColor ic.Color) Color {
-	return color.FromImageColor(imageColor)
-}
+func FromImageColor(imageColor ic.Color) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // FindColor attempts to find a given color, or the best match possible for it,
 // from the palette given.  This is an expensive operation, so results should
 // be cached by the caller.
 // Deprecated: Use color.Find.
-func FindColor(c Color, palette []Color) Color {
-	return color.Find(c, palette)
-}
+func FindColor(c Color, palette []Color) Color { _ = "STUB: not implemented"; return *new(Color) }

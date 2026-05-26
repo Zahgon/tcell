@@ -17,32 +17,12 @@
 
 package tty
 
-import (
-	"syscall"
-
-	"golang.org/x/sys/unix"
-)
-
 // tcSetBufParams is used by the tty driver on UNIX systems to configure the
 // buffering parameters (minimum character count and minimum wait time in msec.)
 // This also waits for output to drain first.
-func tcSetBufParams(fd int, vMin uint8, vTime uint8) error {
-	_ = syscall.SetNonblock(fd, true)
-	tio, err := unix.IoctlGetTermios(fd, unix.TCGETS)
-	if err != nil {
-		return err
-	}
-	tio.Cc[unix.VMIN] = vMin
-	tio.Cc[unix.VTIME] = vTime
-	if err = unix.IoctlSetTermios(fd, unix.TCSETSW, tio); err != nil {
-		return err
-	}
-	return nil
-}
+func tcSetBufParams(fd int, vMin uint8, vTime uint8) error { _ = "STUB: not implemented"; return nil }
 
 // tcFlushInput discards any queued input before the caller starts reading from
 // the tty. This avoids stale bytes, such as delayed mouse reports, from being
 // delivered to the next foreground application.
-func tcFlushInput(fd int) error {
-	return unix.IoctlSetInt(fd, unix.TCFLSH, unix.TCIFLUSH)
-}
+func tcFlushInput(fd int) error { _ = "STUB: not implemented"; return nil }

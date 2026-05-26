@@ -15,9 +15,6 @@
 package tcell
 
 import (
-	"strings"
-	"unicode/utf8"
-
 	"github.com/gdamore/tcell/v3/color"
 )
 
@@ -44,42 +41,11 @@ type urlInfo struct {
 }
 
 // stripOSCControls removes control bytes that can terminate OSC payloads early.
-func stripOSCControls(s string) string {
-	var b strings.Builder
-	b.Grow(len(s))
-	for i := 0; i < len(s); {
-		r, size := utf8.DecodeRuneInString(s[i:])
-		if r == utf8.RuneError && size == 1 {
-			c := s[i]
-			if c <= 0x1f || c == 0x7f || (c >= 0x80 && c <= 0x9f) {
-				i++
-				continue
-			}
-			_ = b.WriteByte(c)
-			i++
-			continue
-		}
-		if r <= 0x1f || r == 0x7f || (r >= 0x80 && r <= 0x9f) {
-			i += size
-			continue
-		}
-		b.WriteString(s[i : i+size])
-		i += size
-	}
-	return b.String()
-}
+func stripOSCControls(s string) string { _ = "STUB: not implemented"; return "" }
 
 // stripOSCControlsIfNeeded returns the original string when it contains no
 // control bytes and only allocates when stripping is required.
-func stripOSCControlsIfNeeded(s string) string {
-	for i := 0; i < len(s); i++ {
-		c := s[i]
-		if c <= 0x1f || c == 0x7f || (c >= 0x80 && c <= 0x9f) {
-			return stripOSCControls(s)
-		}
-	}
-	return s
-}
+func stripOSCControlsIfNeeded(s string) string { _ = "STUB: not implemented"; return "" }
 
 // StyleDefault represents a default style, based upon the context.
 // It is the zero value.
@@ -90,78 +56,46 @@ var styleInvalid = Style{attrs: AttrInvalid}
 
 // Foreground returns a new style based on s, with the foreground color set
 // as requested.  ColorDefault can be used to select the global default.
-func (s Style) Foreground(c color.Color) Style {
-	s2 := s
-	s2.fg = c
-	return s2
-}
+func (s Style) Foreground(c color.Color) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // Background returns a new style based on s, with the background color set
 // as requested.  ColorDefault can be used to select the global default.
-func (s Style) Background(c color.Color) Style {
-	s2 := s
-	s2.bg = c
-	return s2
-}
+func (s Style) Background(c color.Color) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 func (s Style) setAttrs(attrs AttrMask, on bool) Style {
-	s2 := s
-	if on {
-		s2.attrs |= attrs
-	} else {
-		s2.attrs &^= attrs
-	}
-	return s2
+	_ = "STUB: not implemented"
+	return *new(Style)
 }
 
 // Normal returns the style with all attributes disabled.
 // Colors are preserved, as are hyperlinks.  (Underline color
 // will also be preserved, but no underline is currently shown.
 // Apart from color, the underline style is reset as well.)
-func (s Style) Normal() Style {
-	return Style{
-		fg:      s.fg,
-		bg:      s.bg,
-		ulColor: s.ulColor,
-		url:     s.url,
-	}
-}
+func (s Style) Normal() Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // Bold returns a new style based on s, with the bold attribute set
 // as requested.
-func (s Style) Bold(on bool) Style {
-	return s.setAttrs(AttrBold, on)
-}
+func (s Style) Bold(on bool) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // Blink returns a new style based on s, with the blink attribute set
 // as requested.
-func (s Style) Blink(on bool) Style {
-	return s.setAttrs(AttrBlink, on)
-}
+func (s Style) Blink(on bool) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // Dim returns a new style based on s, with the dim attribute set
 // as requested.
-func (s Style) Dim(on bool) Style {
-	return s.setAttrs(AttrDim, on)
-}
+func (s Style) Dim(on bool) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // Italic returns a new style based on s, with the italic attribute set
 // as requested.
-func (s Style) Italic(on bool) Style {
-	return s.setAttrs(AttrItalic, on)
-}
+func (s Style) Italic(on bool) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // Reverse returns a new style based on s, with the reverse attribute set
 // as requested.  (Reverse usually changes the foreground and background
 // colors.)
-func (s Style) Reverse(on bool) Style {
-	return s.setAttrs(AttrReverse, on)
-}
+func (s Style) Reverse(on bool) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // StrikeThrough sets strike-through mode.
-func (s Style) StrikeThrough(on bool) Style {
-	return s.setAttrs(AttrStrikeThrough, on)
-}
+func (s Style) StrikeThrough(on bool) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // Underline style.  Modern terminals have the option of rendering the
 // underline using different styles, and even different colors.
@@ -182,141 +116,85 @@ const (
 // bool: on / off - enables just a simple underline
 // UnderlineStyle: sets a specific style (should not coexist with the bool)
 // Color: the color to use
-func (s Style) Underline(params ...any) Style {
-	s2 := s
-	for _, param := range params {
-		switch v := param.(type) {
-		case bool:
-			if v {
-				s2.ulStyle = UnderlineStyleSolid
-			} else {
-				s2.ulStyle = UnderlineStyleNone
-			}
-		case UnderlineStyle:
-			s2.ulStyle = v
-		case Color:
-			s2.ulColor = v
-		default:
-			panic("Bad type for underline")
-		}
-	}
-	return s2
-}
+func (s Style) Underline(params ...any) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // GetForeground returns the foreground (text) color.
 func (s Style) GetForeground() color.Color {
-	return s.fg
+	_ = "STUB: not implemented"
+
+	// GetBackground returns the background color.
+	return *new(color.Color)
 }
 
-// GetBackground returns the background color.
 func (s Style) GetBackground() color.Color {
-	return s.bg
+	_ = "STUB: not implemented"
+
+	// GetUnderlineStyle returns the underline style for the style.
+	return *new(color.Color)
 }
 
-// GetUnderlineStyle returns the underline style for the style.
 func (s Style) GetUnderlineStyle() UnderlineStyle {
-	return s.ulStyle
+	_ = "STUB: not implemented"
+
+	// GetUnderlineColor returns the underline color for the style.
+	return *new(UnderlineStyle)
 }
 
-// GetUnderlineColor returns the underline color for the style.
 func (s Style) GetUnderlineColor() color.Color {
-	return s.ulColor
+	_ = "STUB: not implemented"
+
+	// Attributes returns a new style based on s, with its attributes set as
+	// specified.
+	//
+	// Deprecated: Use direct functions instead.
+	return *new(color.Color)
 }
 
-// Attributes returns a new style based on s, with its attributes set as
-// specified.
-//
-// Deprecated: Use direct functions instead.
-func (s Style) Attributes(attrs AttrMask) Style {
-	s2 := s
-	s2.attrs = attrs
-	return s2
-}
+func (s Style) Attributes(attrs AttrMask) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // GetAttributes gets the attributes for a style.
 // Deprecated: Use individual properties instead.
 func (s Style) GetAttributes() AttrMask {
-	return s.attrs
+	_ = "STUB: not implemented"
+
+	// Url returns a style with the Url set.  If the provided Url is not empty,
+	// and the terminal supports it, text will typically be marked up as a clickable
+	// link to that Url.  If the Url is empty, then this mode is turned off.
+	return *new(AttrMask)
 }
 
-// Url returns a style with the Url set.  If the provided Url is not empty,
-// and the terminal supports it, text will typically be marked up as a clickable
-// link to that Url.  If the Url is empty, then this mode is turned off.
-func (s Style) Url(url string) Style {
-
-	s2 := s
-	s2.url = &urlInfo{url: stripOSCControlsIfNeeded(url)}
-	if s.url != nil {
-		s2.url.id = s.url.id
-	}
-	if s2.url.url == "" && s2.url.id == "" {
-		s2.url = nil
-	}
-	return s2
-}
+func (s Style) Url(url string) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // UrlId returns a style with the UrlId set. If the provided UrlId is not empty,
 // any marked up Url with this style will be given the UrlId also. If the
 // terminal supports it, any text with the same UrlId will be grouped as if it
 // were one Url, even if it spans multiple lines.
-func (s Style) UrlId(id string) Style {
-	s2 := s
-	s2.url = &urlInfo{}
-	if id = stripOSCControlsIfNeeded(id); id != "" {
-		s2.url.id = "id=" + id
-	}
-	if s.url != nil {
-		s2.url.url = s.url.url
-	}
-	if s2.url.url == "" && s2.url.id == "" {
-		s2.url = nil
-	}
-	return s2
-}
+func (s Style) UrlId(id string) Style { _ = "STUB: not implemented"; return *new(Style) }
 
 // GetUrl returns the URL (id and actual URL) associated with the style.
 // This is a hyper link that will be used for cells marked up with this style.
-func (s Style) GetUrl() (id string, url string) {
-	if s.url != nil {
-		return strings.TrimPrefix(s.url.id, "id="), s.url.url
-	}
-	return "", ""
-}
+func (s Style) GetUrl() (id string, url string) { _ = "STUB: not implemented"; return "", "" }
 
 // HasBold returns true if the style indicates bold text.
 // Note that on some terminals bold text is simply brighter.
-func (s Style) HasBold() bool {
-	return s.attrs&AttrBold != 0
-}
+func (s Style) HasBold() bool { _ = "STUB: not implemented"; return false }
 
 // HasBlink returns true if the style indicates blinking text.
-func (s Style) HasBlink() bool {
-	return s.attrs&AttrBlink != 0
-}
+func (s Style) HasBlink() bool { _ = "STUB: not implemented"; return false }
 
 // HasReverse returns true if the style indicates reverse video text.
-func (s Style) HasReverse() bool {
-	return s.attrs&AttrReverse != 0
-}
+func (s Style) HasReverse() bool { _ = "STUB: not implemented"; return false }
 
 // HasItalic returns true if the style indicates italicized text.
-func (s Style) HasItalic() bool {
-	return s.attrs&AttrItalic != 0
-}
+func (s Style) HasItalic() bool { _ = "STUB: not implemented"; return false }
 
 // HasDim returns true if the style indicates dim or faint text.
-func (s Style) HasDim() bool {
-	return s.attrs&AttrDim != 0
-}
+func (s Style) HasDim() bool { _ = "STUB: not implemented"; return false }
 
 // HasStrikeThrough returns true if the style indicates crossed-out text.
-func (s Style) HasStrikeThrough() bool {
-	return s.attrs&AttrStrikeThrough != 0
-}
+func (s Style) HasStrikeThrough() bool { _ = "STUB: not implemented"; return false }
 
 // HasUnderline returns true if any underline style is set.
 // Note that more detail is available via the GetUnderlineStyle
 // and GetUnderlineColor methods.
-func (s Style) HasUnderline() bool {
-	return s.ulStyle != UnderlineStyleNone
-}
+func (s Style) HasUnderline() bool { _ = "STUB: not implemented"; return false }

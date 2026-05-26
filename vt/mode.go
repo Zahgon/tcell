@@ -17,8 +17,6 @@
 // the Windows Terminal.
 package vt
 
-import "fmt"
-
 // PrivateMode describes a DEC Private Mode.
 type PrivateMode int
 
@@ -53,24 +51,16 @@ const (
 )
 
 // Enable returns the string used to enable this private mode.
-func (pm PrivateMode) Enable() string {
-	return fmt.Sprintf("\x1b[?%dh", pm)
-}
+func (pm PrivateMode) Enable() string { _ = "STUB: not implemented"; return "" }
 
 // Disable returns the string used to disable this private mode.
-func (pm PrivateMode) Disable() string {
-	return fmt.Sprintf("\x1b[?%dl", pm)
-}
+func (pm PrivateMode) Disable() string { _ = "STUB: not implemented"; return "" }
 
 // Query returns the string used to query the state of this private mode.
-func (pm PrivateMode) Query() string {
-	return fmt.Sprintf("\x1b[?%d$p", pm)
-}
+func (pm PrivateMode) Query() string { _ = "STUB: not implemented"; return "" }
 
 // Reply returns a string representing a query reply for the given mode and status.
-func (pm PrivateMode) Reply(status ModeStatus) string {
-	return fmt.Sprintf("\x1b[?%d;%d$y", pm, status)
-}
+func (pm PrivateMode) Reply(status ModeStatus) string { _ = "STUB: not implemented"; return "" }
 
 // ModeStatus represents the status of the mode.
 type ModeStatus int
@@ -80,24 +70,16 @@ type ModeStatus int
 type AnsiMode int
 
 // Enable returns the string used to enable this ANSI mode.
-func (pm AnsiMode) Enable() string {
-	return fmt.Sprintf("\x1b[%dh", pm)
-}
+func (pm AnsiMode) Enable() string { _ = "STUB: not implemented"; return "" }
 
 // Disable returns the string used to disable this ANSI mode.
-func (pm AnsiMode) Disable() string {
-	return fmt.Sprintf("\x1b[%dl", pm)
-}
+func (pm AnsiMode) Disable() string { _ = "STUB: not implemented"; return "" }
 
 // Query returns the string used to query the state of this ANSI mode.
-func (pm AnsiMode) Query() string {
-	return fmt.Sprintf("\x1b[%d$p", pm)
-}
+func (pm AnsiMode) Query() string { _ = "STUB: not implemented"; return "" }
 
 // Reply returns a string representing a query reply for the given mode and status.
-func (pm AnsiMode) Reply(status ModeStatus) string {
-	return fmt.Sprintf("\x1b[%d;%d$y", pm, status)
-}
+func (pm AnsiMode) Reply(status ModeStatus) string { _ = "STUB: not implemented"; return "" }
 
 const (
 	AmKeyboardAction AnsiMode = 2  // Lock the keyboard.
@@ -115,6 +97,4 @@ const (
 )
 
 // Changeable indicates that the mode may be changed.
-func (ms ModeStatus) Changeable() bool {
-	return ms == ModeOn || ms == ModeOff
-}
+func (ms ModeStatus) Changeable() bool { _ = "STUB: not implemented"; return false }

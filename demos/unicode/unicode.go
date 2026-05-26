@@ -28,11 +28,7 @@ import (
 var row = 0
 var style = tcell.StyleDefault
 
-func putln(s tcell.Screen, str string) {
-
-	s.PutStrStyled(1, row, str, style)
-	row++
-}
+func putln(s tcell.Screen, str string) { _ = "STUB: not implemented"; return }
 
 func main() {
 

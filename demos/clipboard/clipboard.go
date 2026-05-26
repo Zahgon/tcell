@@ -17,7 +17,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"unicode/utf8"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
@@ -25,42 +24,7 @@ import (
 
 var clipboard []byte
 
-func displayHelloWorld(s tcell.Screen) {
-	w, h := s.Size()
-	s.Clear()
-	style := tcell.StyleDefault.Foreground(color.CadetBlue.TrueColor()).Background(color.White)
-	has := "does NOT claim"
-	if s.HasClipboard() {
-		has = "claims to"
-	}
-	term, version := s.Terminal()
-	termId := "(unidentified)"
-	if term != "" {
-		termId = fmt.Sprintf("(%s %s)", term, version)
-	}
-	line := fmt.Sprintf("Your terminal %s %s to allow clipboard access.", termId, has)
-
-	s.PutStrStyled(w/2-14, h/2, "Press 1 to set clipboard", style)
-	s.PutStrStyled(w/2-14, h/2+1, "Press 2 to get clipboard", style)
-	s.PutStr((w-len(line))/2, h/2+9, line)
-
-	msg := ""
-	if utf8.Valid(clipboard) {
-		cp := string(clipboard)
-		if len(cp) >= w-25 {
-			cp = cp[:21] + " ..."
-		}
-		msg = fmt.Sprintf("Clipboard (%d bytes): %s", len(clipboard), cp)
-	} else if clipboard != nil {
-		msg = fmt.Sprintf("Clipboard (%d bytes) Not Valid UTF-8", len(clipboard))
-	} else {
-		msg = "No clipboard data"
-	}
-	s.PutStr((w-len(msg))/2, h/2+3, msg)
-	line = "Press Control-Q to exit."
-	s.PutStr((w-len(line))/2, h/2+5, line)
-	s.Show()
-}
+func displayHelloWorld(s tcell.Screen) { _ = "STUB: not implemented"; return }
 
 // This program demonstrates access to the clipboard.
 // Not all terminals support, and many only support write access.

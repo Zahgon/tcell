@@ -15,9 +15,7 @@
 package color
 
 import (
-	"fmt"
 	ic "image/color"
-	"strconv"
 )
 
 // Color represents a color.  The low numeric values are the same as used
@@ -1017,158 +1015,63 @@ var Names = map[string]Color{
 }
 
 // Valid indicates the color is a valid value (has been set).
-func (c Color) Valid() bool {
-	return c&IsValid != 0
-}
+func (c Color) Valid() bool { _ = "STUB: not implemented"; return false }
 
 // IsRGB is true if the color is an RGB specific value.
-func (c Color) IsRGB() bool {
-	return c&(IsValid|IsRGB) == (IsValid | IsRGB)
-}
+func (c Color) IsRGB() bool { _ = "STUB: not implemented"; return false }
 
 // CSS returns the CSS hex string ( #ABCDEF ) if valid
 // if not a valid color returns empty string
-func (c Color) CSS() string {
-	if !c.Valid() {
-		return ""
-	}
-	return fmt.Sprintf("#%06X", c.Hex())
-}
+func (c Color) CSS() string { _ = "STUB: not implemented"; return "" }
 
 // String implements fmt.Stringer to return either the
 // W3C name if it has one or the CSS hex string '#ABCDEF'
-func (c Color) String() string {
-	if !c.Valid() {
-		switch c {
-		case None:
-			return "none"
-		case Default:
-			return "default"
-		case Reset:
-			return "reset"
-		}
-		return ""
-	}
-	return c.Name(true)
-}
+func (c Color) String() string { _ = "STUB: not implemented"; return "" }
 
 // Name returns W3C name or an empty string if no arguments
 // if passed true as an argument it will falls back to
 // the CSS hex string if no W3C name found '#ABCDEF'
-func (c Color) Name(css ...bool) string {
-	for name, hex := range Names {
-		if c == hex {
-			return name
-		}
-	}
-	if len(css) > 0 && css[0] {
-		return c.CSS()
-	}
-	return ""
-}
+func (c Color) Name(css ...bool) string { _ = "STUB: not implemented"; return "" }
 
 // Hex returns the color's hexadecimal RGB 24-bit value with each component
 // consisting of a single byte, R << 16 | G << 8 | B.  If the color
 // is unknown or unset, -1 is returned.
-func (c Color) Hex() int32 {
-	if !c.Valid() {
-		return -1
-	}
-	if c&IsRGB != 0 {
-		return int32(c & 0xffffff)
-	}
-	if v, ok := ColorValues[c]; ok {
-		return v
-	}
-	return -1
-}
+func (c Color) Hex() int32 { _ = "STUB: not implemented"; return 0 }
 
 // RGB returns the red, green, and blue components of the color, with
 // each component represented as a value 0-255.  In the event that the
 // color cannot be broken up (not set usually), -1 is returned for each value.
-func (c Color) RGB() (int32, int32, int32) {
-	v := c.Hex()
-	if v < 0 {
-		return -1, -1, -1
-	}
-	return (v >> 16) & 0xff, (v >> 8) & 0xff, v & 0xff
-}
+func (c Color) RGB() (int32, int32, int32) { _ = "STUB: not implemented"; return 0, 0, 0 }
 
 // TrueColor returns the true color (RGB) version of the provided color.
 // This is useful for ensuring color accuracy when using named colors.
 // This will override terminal theme colors.
-func (c Color) TrueColor() Color {
-	if !c.Valid() {
-		return Default
-	}
-	if c&IsRGB != 0 {
-		return c | IsValid
-	}
-	if hex := c.Hex(); hex < 0 {
-		return Default
-	} else {
-		return Color(hex) | IsRGB | IsValid
-	}
-}
+func (c Color) TrueColor() Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // RGBA makes these colors directly usable as imageColor colors.
 // The values are scaled only to 16 bits.  Invalid colors are returned
 // with all values being zero (notably the alpha is zero, so fully transparent),
 // otherwise the alpha channel is set to 0xffff (fully opaque).
-func (c Color) RGBA() (r, g, b, a uint32) {
-	if !c.Valid() {
-		return 0, 0, 0, 0
-	}
-	r1, g1, b1 := c.RGB()
-	r = uint32(r1)
-	g = uint32(g1)
-	b = uint32(b1)
-	r = r | r<<8
-	g = g | g<<8
-	b = b | b<<8
-	a = 0xffff
-	return r, g, b, a
-}
+func (c Color) RGBA() (r, g, b, a uint32) { _ = "STUB: not implemented"; return 0, 0, 0, 0 }
 
 // NewRGBColor returns a new color with the given red, green, and blue values.
 // Each value must be represented in the range 0-255.
-func NewRGBColor(r, g, b int32) Color {
-	return NewHexColor(((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff))
-}
+func NewRGBColor(r, g, b int32) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // NewHexColor returns a color using the given 24-bit RGB value.
-func NewHexColor(v int32) Color {
-	return IsRGB | Color(v) | IsValid
-}
+func NewHexColor(v int32) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // GetColor creates a Color from a color name (W3C name). A hex value may
 // be supplied as a string in the format "#ffffff".
-func GetColor(name string) Color {
-	if c, ok := Names[name]; ok {
-		return c
-	}
-	if len(name) == 7 && name[0] == '#' {
-		if v, e := strconv.ParseInt(name[1:], 16, 32); e == nil {
-			return NewHexColor(int32(v))
-		}
-	}
-	return Default
-}
+func GetColor(name string) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // PaletteColor creates a color based on the palette index.
-func PaletteColor(index int) Color {
-	return Color(index) | IsValid
-}
+func PaletteColor(index int) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // FromImageColor converts an image/color.Color into Color.
 // The alpha value is limited to just zero and non-zero, so it should
 // be tracked separately if full detail is needed. (A zero alpha
 // becomes the default color, which means no color change at all.)
-func FromImageColor(imageColor ic.Color) Color {
-	r, g, b, a := imageColor.RGBA()
-	if a == 0 {
-		return Default
-	}
-	// NOTE image/color.Color RGB values range is [0, 0xFFFF] as uint32
-	return NewRGBColor(int32(r>>8), int32(g>>8), int32(b>>8))
-}
+func FromImageColor(imageColor ic.Color) Color { _ = "STUB: not implemented"; return *new(Color) }
+
+// NOTE image/color.Color RGB values range is [0, 0xFFFF] as uint32

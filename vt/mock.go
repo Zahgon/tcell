@@ -15,11 +15,9 @@
 package vt
 
 import (
-	"slices"
 	"sync"
 	"time"
 
-	"github.com/gdamore/tcell/v3/color"
 	"github.com/gdamore/tcell/v3/tty"
 )
 
@@ -31,148 +29,115 @@ type mockTerm struct {
 }
 
 // Stop the terminal.
-func (mt *mockTerm) Stop() error {
-	return mt.em.Stop()
-}
+func (mt *mockTerm) Stop() error { _ = "STUB: not implemented"; return nil }
 
 // Start the terminal.
-func (mt *mockTerm) Start() error {
-	return mt.em.Start()
-}
+func (mt *mockTerm) Start() error { _ = "STUB: not implemented"; return nil }
 
 // Drain all output from the terminal, ensuring
 // any queued commands are processed.
-func (mt *mockTerm) Drain() error {
-	return mt.em.Drain()
-}
+func (mt *mockTerm) Drain() error { _ = "STUB: not implemented"; return nil }
 
 // Read data from the terminal. This is called by a terminal
 // application (e.g. via tcell Tty.)  Read data will include
 // key strokes, mouse events, and responses to terminal queries.
 func (mt *mockTerm) Read(data []byte) (int, error) {
-	return mt.em.Read(data)
+	_ = "STUB: not implemented"
+	return 0,
+
+		// Write data to the terminal, typically either commands or data
+		// that should be displayed on the virtual screen.
+		nil
 }
 
-// Write data to the terminal, typically either commands or data
-// that should be displayed on the virtual screen.
 func (mt *mockTerm) Write(b []byte) (n int, err error) {
-	return mt.em.Write(b)
+	_ = "STUB: not implemented"
+	return 0,
+
+		// WindowSize obtains the dimensions of the window.
+		nil
 }
 
-// WindowSize obtains the dimensions of the window.
 func (mt *mockTerm) WindowSize() (tty.WindowSize, error) {
-	sz := mt.mb.GetSize()
+	_ = "STUB: not implemented"
+	return *
+
 	// No pixel sizes for now
-	return tty.WindowSize{Width: int(sz.X), Height: int(sz.Y)}, nil
+	new(tty.WindowSize), nil
 }
 
 // NotifyResize registers a channel to be signaled when a resize has occurred.
 // In real terminal emulators this would be posted (non-blocking) by a signal handler.
-func (mt *mockTerm) NotifyResize(resizeq chan<- bool) {
-	if rs, ok := mt.mb.(Resizer); ok {
-		rs.NotifyResize(resizeq)
-	}
-}
+func (mt *mockTerm) NotifyResize(resizeq chan<- bool) { _ = "STUB: not implemented"; return }
 
 // Close closes the terminal, after which it should no longer be used. Stop is implied.
 func (mt *mockTerm) Close() error {
-	return mt.Stop()
+	_ = "STUB: not implemented"
+
+	// Pos returns the cursor position.
+	return nil
 }
 
-// Pos returns the cursor position.
-func (mt *mockTerm) Pos() Coord {
-	return mt.mb.GetPosition()
-}
+func (mt *mockTerm) Pos() Coord { _ = "STUB: not implemented"; return *new(Coord) }
 
 // GetCell returns the contents of the cell at the given coordinates, or a zero value
 // if the coordinates are out of range.
 func (mt *mockTerm) GetCell(pos Coord) Cell {
-	return mt.mb.GetCell(pos)
+	_ = "STUB: not implemented"
+	return *
+
+	// Bells counts the number of times the bell has rung.
+	new(Cell)
 }
 
-// Bells counts the number of times the bell has rung.
-func (mt *mockTerm) Bells() int {
-	return mt.mb.Bells()
-}
+func (mt *mockTerm) Bells() int { _ = "STUB: not implemented"; return 0 }
 
 // KeyEvent is used to inject a key event.  Call this to inject
 // a synthetic, fully specified key event.  Most uses should just use
 // the KeyPress, KeyRelease, or even simpler KeyTap APIs.
-func (mt *mockTerm) KeyEvent(ev KeyEvent) {
-	mt.em.KeyEvent(ev)
-	if ev.Key == KeyEsc {
-		// Inject a delay to simulate human typing.
-		// Necessary to disambiguate Escape from other sequences.
-		time.Sleep(time.Millisecond * 150)
-	}
-}
+func (mt *mockTerm) KeyEvent(ev KeyEvent) { _ = "STUB: not implemented"; return }
+
+// Inject a delay to simulate human typing.
+// Necessary to disambiguate Escape from other sequences.
 
 // KeyPress implements MockTerm.KeyPress.
-func (mt *mockTerm) KeyPress(k Key) {
-	if event := mt.ks.Pressed(k); event != nil {
-		mt.KeyEvent(*event)
-	}
-}
+func (mt *mockTerm) KeyPress(k Key) { _ = "STUB: not implemented"; return }
 
 // KeyRelease implements MockTerm.KeyRelease.
-func (mt *mockTerm) KeyRelease(k Key) {
-	if event := mt.ks.Released(k); event != nil {
-		mt.KeyEvent(*event)
-	}
-}
+func (mt *mockTerm) KeyRelease(k Key) { _ = "STUB: not implemented"; return }
 
 // KeyTap implements MockTerm.KeyTap.
-func (mt *mockTerm) KeyTap(keys ...Key) {
-	for _, k := range keys {
-		mt.KeyPress(k)
-	}
-	for _, k := range slices.Backward(keys) {
-		mt.KeyRelease(k)
-	}
-}
+func (mt *mockTerm) KeyTap(keys ...Key) { _ = "STUB: not implemented"; return }
 
 // SetRepeat sets the repeat interval for the keyboard.
 // Set the interval to zero to disable repeat.
-func (mt *mockTerm) SetRepeat(delay, interval time.Duration) {
-	mt.ks.SetRepeat(delay, interval)
-}
+func (mt *mockTerm) SetRepeat(delay, interval time.Duration) { _ = "STUB: not implemented"; return }
 
 // MouseEvent implements MockTerm.MouseEvent.
-func (mt *mockTerm) MouseEvent(ev MouseEvent) {
-	mt.em.MouseEvent(ev)
-}
+func (mt *mockTerm) MouseEvent(ev MouseEvent) { _ = "STUB: not implemented"; return }
 
 // FocusEvent implements MockTerm.FocusEvent.
-func (mt *mockTerm) FocusEvent(focused bool) {
-	mt.em.FocusEvent(focused)
-}
+func (mt *mockTerm) FocusEvent(focused bool) { _ = "STUB: not implemented"; return }
 
 // GetTitle returns the current window title.
-func (mt *mockTerm) GetTitle() string {
-	return mt.mb.GetTitle()
-}
+func (mt *mockTerm) GetTitle() string { _ = "STUB: not implemented"; return "" }
 
 // SetSize is used to change the terminal size.
-func (mt *mockTerm) SetSize(size Coord) {
-	mt.mb.SetSize(size)
-	mt.em.ResizeEvent(size)
-}
+func (mt *mockTerm) SetSize(size Coord) { _ = "STUB: not implemented"; return }
 
 // Backend returns the backend for testing.
 func (mt *mockTerm) Backend() MockBackend {
-	return mt.mb
+	_ = "STUB: not implemented"
+
+	// SendRaw is used to inject raw bytes to the read stream of the app.
+	// Use this for fuzz testing.
+	return *new(MockBackend)
 }
 
-// SendRaw is used to inject raw bytes to the read stream of the app.
-// Use this for fuzz testing.
-func (mt *mockTerm) SendRaw(data []byte) {
-	mt.em.SendRaw(data)
-}
+func (mt *mockTerm) SendRaw(data []byte) { _ = "STUB: not implemented"; return }
 
 // SetLayout sets the keyboard layout.
-func (mt *mockTerm) SetLayout(km *Layout) {
-	mt.ks.SetLayout(km)
-}
+func (mt *mockTerm) SetLayout(km *Layout) { _ = "STUB: not implemented"; return }
 
 // MockTerm is a mock terminal (emulator).  It can be used to
 // test the emulator itself, or to test applications (or tcell) that
@@ -243,24 +208,7 @@ type noMockBlit struct {
 }
 
 // NewMockTerm gives a mock terminal emulator.
-func NewMockTerm(opts ...MockOpt) MockTerm {
-	mt := &mockTerm{}
-	mt.mb = NewMockBackend(opts...)
-	var be MockBackend = mt.mb
-	emOpts := []EmulatorOpt{}
-	for _, o := range opts {
-		switch o.(type) {
-		case MockOptNoBlit:
-			be = &noMockBlit{be, struct{}{}}
-		case MockOpt8BitControls:
-			emOpts = append(emOpts, EmulatorOpt8BitControls{})
-		}
-	}
-	mt.em = NewEmulator(be, emOpts...)
-	mt.em.SetId("TCellMock", "1.0")
-	mt.ks = &KeyboardState{}
-	return mt
-}
+func NewMockTerm(opts ...MockOpt) MockTerm { _ = "STUB: not implemented"; return *new(MockTerm) }
 
 // MockBackend provides additional mock-specific capabilities on top of Backend.
 // This is meant to facilitate test cases
@@ -316,370 +264,167 @@ type mockBackend struct {
 	lock         sync.Mutex
 }
 
-func (mb *mockBackend) GetSize() Coord {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	mb.checkSize()
-	return mb.size
-}
+func (mb *mockBackend) GetSize() Coord { _ = "STUB: not implemented"; return *new(Coord) }
 
-func (mb *mockBackend) Beep() {
-	mb.lock.Lock()
-	mb.bells++
-	mb.lock.Unlock()
-}
+func (mb *mockBackend) Beep() { _ = "STUB: not implemented"; return }
 
-func (mb *mockBackend) SetMouse(MouseReporting) {}
+func (mb *mockBackend) SetMouse(MouseReporting) { _ = "STUB: not implemented"; return }
 
 func (mb *mockBackend) GetPrivateMode(pm PrivateMode) ModeStatus {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	// note default (zero) value is ModeNA
-	return mb.modes[pm]
+	_ = "STUB: not implemented"
+	return *new(ModeStatus)
 }
 
+// note default (zero) value is ModeNA
+
 func (mb *mockBackend) SetPrivateMode(pm PrivateMode, status ModeStatus) error {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	if old := mb.modes[pm]; old == ModeOn || old == ModeOff {
-		if status == ModeOn || status == ModeOff {
-			mb.modes[pm] = status
-		} else {
-			mb.errs++
-		}
-	} else {
-		mb.errs++
-	}
+	_ = "STUB: not implemented"
 	return nil
 }
 
-func (mb *mockBackend) Put(pos Coord, cell Cell) { // grapheme string, width int, style Style) {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	mb.checkSize()
-
-	if index := mb.index(pos); index >= 0 {
-		mb.cells[index] = cell
-
-		// writing to a cell right after a wide
-		// character clears that wide character (but leaves style/attributes)
-		if cell.W > 0 && pos.X > 0 && mb.cells[index-1].W > 1 {
-			mb.cells[index-1].C = ""
-			mb.cells[index-1].W = 0
-		}
-
-		// wide characters delete the next cell
-		if cell.W == 2 && pos.X < mb.size.X-1 {
-			mb.cells[index+1].C = ""
-			mb.cells[index+1].W = 0
-			mb.cells[index+1].S = cell.S
-		}
-	} else {
-		mb.errs++
-	}
+func (mb *mockBackend) Put(pos Coord, cell Cell) {
+	_ = "STUB: not implemented" // grapheme string, width int, style Style) {
+	return
 }
 
-func (mb *mockBackend) isPositionValid(pos Coord) bool {
-	mb.checkSize()
+// writing to a cell right after a wide
+// character clears that wide character (but leaves style/attributes)
 
-	return pos.X < mb.size.X && pos.Y < mb.size.Y && pos.X >= 0 && pos.Y >= 0
-}
+// wide characters delete the next cell
+
+func (mb *mockBackend) isPositionValid(pos Coord) bool { _ = "STUB: not implemented"; return false }
 
 // index calculates the index in the cells array.  If the coordinates are invalid,
 // -1 will be returned.
-func (mb *mockBackend) index(pos Coord) int {
-	mb.checkSize()
+func (mb *mockBackend) index(pos Coord) int { _ = "STUB: not implemented"; return 0 }
 
-	if !mb.isPositionValid(pos) {
-		return -1
-	}
-	return int(pos.X) + int(pos.Y)*int(mb.size.X)
-}
+func (mb *mockBackend) GetCell(pos Coord) Cell { _ = "STUB: not implemented"; return *new(Cell) }
 
-func (mb *mockBackend) GetCell(pos Coord) Cell {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
+func (mb *mockBackend) Bells() int { _ = "STUB: not implemented"; return 0 }
 
-	if index := mb.index(pos); index >= 0 {
-		return mb.cells[index]
-	}
-	return Cell{S: BaseStyle}
-}
+func (mb *mockBackend) GetPosition() Coord { _ = "STUB: not implemented"; return *new(Coord) }
 
-func (mb *mockBackend) Bells() int {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	return mb.bells
-}
+func (mb *mockBackend) SetPosition(pos Coord) { _ = "STUB: not implemented"; return }
 
-func (mb *mockBackend) GetPosition() Coord {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	mb.checkSize()
-	return mb.pos
-}
+func (mb *mockBackend) Colors() int { _ = "STUB: not implemented"; return 0 }
 
-func (mb *mockBackend) SetPosition(pos Coord) {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	mb.checkSize()
-	pos.X = min(mb.size.X-1, max(0, pos.X))
-	pos.Y = min(mb.size.Y-1, max(0, pos.Y))
-	mb.pos = pos
-}
-
-func (mb *mockBackend) Colors() int {
-	return mb.colors
-}
-
-func (mb *mockBackend) SetStyle(style Style) {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-
-	mb.style = style
-}
+func (mb *mockBackend) SetStyle(style Style) { _ = "STUB: not implemented"; return }
 
 // SetWindowTitle implements the Titler interface.
-func (mb *mockBackend) SetWindowTitle(title string) {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-
-	mb.title = title
-}
+func (mb *mockBackend) SetWindowTitle(title string) { _ = "STUB: not implemented"; return }
 
 // GetTitle allows test code to observe what was set with SetWindowTitle.
-func (mb *mockBackend) GetTitle() string {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-
-	return mb.title
-}
+func (mb *mockBackend) GetTitle() string { _ = "STUB: not implemented"; return "" }
 
 // NotifyResize registers a channel to be written to (non-blocking) if the
 // backend changes size.
-func (mb *mockBackend) NotifyResize(rq chan<- bool) {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-
-	mb.notifyQ = rq
-}
+func (mb *mockBackend) NotifyResize(rq chan<- bool) { _ = "STUB: not implemented"; return }
 
 // checkSize performs a possible terminal resize. Cells that are
 // added are treated as empty, while cells that are removed are just lost.
 // (Note that at least one other emulator erases content on a resize.  There is no
 // standard for what to do here.) This is done inline when calculating the index.
 // The caller is expected to hold mb.lock.
-func (mb *mockBackend) checkSize() {
-	if !mb.resized {
-		return
-	}
-	size := mb.newSize
-	old := mb.cells
-	ox := int(mb.size.X)
-	oy := int(mb.size.Y)
-	nx := int(size.X)
-	ny := int(size.Y)
-	cells := make([]Cell, int(size.Y)*int(size.X))
-	for i := range cells {
-		cells[i].S = BaseStyle
-	}
-	for y := range min(ny, oy) {
-		for x := range min(nx, ox) {
-			cells[y*nx+x] = old[y*ox+x]
-		}
-	}
-	mb.cells = cells
-	mb.size = size
-	mb.pos.X = min(mb.pos.X, size.X-1)
-	mb.pos.Y = min(mb.pos.Y, size.Y-1)
-	mb.resized = false
-}
+func (mb *mockBackend) checkSize() { _ = "STUB: not implemented"; return }
 
-func (mb *mockBackend) RaiseResize() {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-
-	if rq := mb.notifyQ; rq != nil {
-		select {
-		case rq <- true:
-		default:
-		}
-	}
-}
+func (mb *mockBackend) RaiseResize() { _ = "STUB: not implemented"; return }
 
 // SetSize is used to change the size of the virtual terminal.
-func (mb *mockBackend) SetSize(size Coord) {
-	mb.lock.Lock()
-	mb.resized = true
-	mb.newSize = size
-	mb.lock.Unlock()
-}
+func (mb *mockBackend) SetSize(size Coord) { _ = "STUB: not implemented"; return }
 
 // Reset the terminal to startup defaults.
-func (mb *mockBackend) Reset() {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
+func (mb *mockBackend) Reset() { _ = "STUB: not implemented"; return }
 
-	mb.style = mb.defaultStyle
+func (mb *mockBackend) Blit(src, dst, dim Coord) { _ = "STUB: not implemented"; return }
 
-	mb.title = ""
-	mb.errs = 0
-	mb.bells = 0
-	mb.pos = Coord{X: 0, Y: 0}
-	mb.modes[PmShowCursor] = ModeOn
-	mb.modes[PmBlinkCursor] = ModeOn
-	mb.modes[PmGraphemeClusters] = ModeOff
-}
+// clip to visible source
 
-func (mb *mockBackend) Blit(src, dst, dim Coord) {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
+// and clip to final destination
 
-	mb.checkSize()
+// gap represents decrement when shifting to the next row --
+// skipping over the irrelevant cells. (The increment in the
+// index when going from last cell of row to first cell of next row,
+// or vice versa.)
 
-	// clip to visible source
-	if dim.X+src.X > mb.size.X {
-		dim.X = mb.size.X - src.X
-	}
-	if dim.Y+src.Y > mb.size.Y {
-		dim.Y = mb.size.Y - src.Y
-	}
-	// and clip to final destination
-	if dim.X+dst.X > mb.size.X {
-		dim.X = mb.size.X - dst.X
-	}
-	if dim.Y+dst.Y > mb.size.Y {
-		dim.Y = mb.size.Y - dst.Y
-	}
+// the following logic is carefully constructed to avoid expensive
+// operations in the loops (only addition or subtraction)
+// source appears later, so we can forward copy
 
-	// gap represents decrement when shifting to the next row --
-	// skipping over the irrelevant cells. (The increment in the
-	// index when going from last cell of row to first cell of next row,
-	// or vice versa.)
-	gap := int(mb.size.X - dim.X)
+// advance to next row
 
-	// the following logic is carefully constructed to avoid expensive
-	// operations in the loops (only addition or subtraction)
-	if mb.index(src) > mb.index(dst) { // source appears later, so we can forward copy
-		si := mb.index(src)
-		di := mb.index(dst)
-		for range dim.Y {
-			for range dim.X {
-				mb.cells[di] = mb.cells[si]
-				di++
-				si++
-			}
-			// advance to next row
-			si += gap
-			di += gap
-		}
-	} else { // source appears earlier, so we have to reverse copy
-		src.Y += dim.Y - 1
-		dst.Y += dim.Y - 1
-		src.X += dim.X - 1
-		dst.X += dim.X - 1
-		si := mb.index(src)
-		di := mb.index(dst)
-
-		for range dim.Y {
-			for range dim.X {
-				mb.cells[di] = mb.cells[si]
-				si--
-				di--
-			}
-			si -= gap
-			di -= gap
-		}
-	}
-}
+// source appears earlier, so we have to reverse copy
 
 // Buffering is not supported by the mockBackend, and there is little point in it.
-func (mb *mockBackend) Buffering(bool) {}
+func (mb *mockBackend) Buffering(bool) {
+	_ = "STUB: not implemented"
 
-// SetCursor is used to set how the cursor is displayed.
-func (mb *mockBackend) SetCursor(cs CursorStyle) {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	mb.cursor = cs
+	// SetCursor is used to set how the cursor is displayed.
+	return
 }
+
+func (mb *mockBackend) SetCursor(cs CursorStyle) { _ = "STUB: not implemented"; return }
 
 // GetCursor returns the current cursor style.
-func (mb *mockBackend) GetCursor() CursorStyle {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	return mb.cursor
-}
+func (mb *mockBackend) GetCursor() CursorStyle { _ = "STUB: not implemented"; return *new(CursorStyle) }
 
 // SetClipboard sets the current clipboard contents.
-func (mb *mockBackend) SetClipboard(data []byte) {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	mb.clipboard = data
-}
+func (mb *mockBackend) SetClipboard(data []byte) { _ = "STUB: not implemented"; return }
 
 // GetClipboard gets the current clipboard contents.
-func (mb *mockBackend) GetClipboard() []byte {
-	mb.lock.Lock()
-	defer mb.lock.Unlock()
-	return mb.clipboard
-}
+func (mb *mockBackend) GetClipboard() []byte { _ = "STUB: not implemented"; return nil }
 
 // IsAdvancedKeyboard returns true - we always implement
 // the raw keyboard protocol.
-func (mb *mockBackend) IsAdvancedKeyboard() bool { return true }
+func (mb *mockBackend) IsAdvancedKeyboard() bool {
+	_ = "STUB: not implemented"
 
-// MockOpt is an interface by which options can change the behavior of the mocked terminal.
-// This is intended to permit easier testing.
+	// MockOpt is an interface by which options can change the behavior of the mocked terminal.
+	// This is intended to permit easier testing.
+	return false
+}
+
 type MockOpt interface{ SetMockOpt(mb *mockBackend) }
 
 // MockOptSize changes the default terminal size, which is normally 80x24.
 type MockOptSize Coord
 
-func (o MockOptSize) SetMockOpt(mb *mockBackend) { mb.size = Coord(o) }
+func (o MockOptSize) SetMockOpt(mb *mockBackend) {
+	_ = "STUB: not implemented"
 
-// MockOptColors changes the number of colors the terminal supports.
+	// MockOptColors changes the number of colors the terminal supports.
+	return
+}
+
 type MockOptColors int
 
-func (o MockOptColors) SetMockOpt(mb *mockBackend) { mb.colors = int(o) }
+func (o MockOptColors) SetMockOpt(mb *mockBackend) {
+	_ = "STUB: not implemented"
 
-// MockOptNoBlit suppresses the blitter interface.
+	// MockOptNoBlit suppresses the blitter interface.
+	return
+}
+
 type MockOptNoBlit struct{}
 
-func (MockOptNoBlit) SetMockOpt(mb *mockBackend) {}
+func (MockOptNoBlit) SetMockOpt(mb *mockBackend) {
+	_ = "STUB: not implemented"
 
-// MockOpt8BitControls enables raw 8-bit and UTF-8 encoded C1 controls in the
-// emulator. The default is to accept only 7-bit ESC-prefixed controls.
+	// MockOpt8BitControls enables raw 8-bit and UTF-8 encoded C1 controls in the
+	// emulator. The default is to accept only 7-bit ESC-prefixed controls.
+	return
+}
+
 type MockOpt8BitControls struct{}
 
-func (MockOpt8BitControls) SetMockOpt(mb *mockBackend) {}
+func (MockOpt8BitControls) SetMockOpt(mb *mockBackend) {
+	_ = "STUB: not implemented"
 
-// NewMockBackend returns a MockBackend modified by the given options.
-// The default is a fully featured 256-color backend with initial size 80x24.
+	// NewMockBackend returns a MockBackend modified by the given options.
+	// The default is a fully featured 256-color backend with initial size 80x24.
+	return
+}
+
 func NewMockBackend(options ...MockOpt) MockBackend {
-	mb := &mockBackend{
-		size:         Coord{X: 80, Y: 24},
-		colors:       256,
-		style:        BaseStyle,
-		defaultStyle: BaseStyle.WithFg(color.Silver).WithBg(color.Black),
-		cursor:       BlinkingBlock,
-	}
-
-	for _, opt := range options {
-		opt.SetMockOpt(mb)
-	}
-
-	if mb.colors > 0 {
-		mb.style = mb.defaultStyle
-	}
-	mb.cells = make([]Cell, int(mb.size.X)*int(mb.size.Y))
-	for i := range mb.cells {
-		mb.cells[i].S = BaseStyle
-	}
-
-	mb.modes = make(map[PrivateMode]ModeStatus)
-	mb.modes[PmShowCursor] = ModeOn
-	mb.modes[PmBlinkCursor] = ModeOn
-	mb.modes[PmGraphemeClusters] = ModeOff
-	mb.modes[PmSyncOutput] = ModeOff
-	return mb
+	_ = "STUB: not implemented"
+	return *new(MockBackend)
 }

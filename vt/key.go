@@ -23,16 +23,7 @@ type BaseKey rune
 
 var shiftedBaseKeys map[BaseKey]rune
 
-func (bk BaseKey) Shifted() rune {
-
-	if s, ok := shiftedBaseKeys[bk]; ok {
-		return s
-	}
-	if bk >= 'a' && bk <= 'z' {
-		return rune(bk - 32)
-	}
-	return rune(bk)
-}
+func (bk BaseKey) Shifted() rune { _ = "STUB: not implemented"; return 0 }
 
 // ScanCode is the scan code used by Windows for a key. These are physical key locations,
 // and every physical should have a exactly one mapping here.
@@ -189,13 +180,7 @@ var scanCodes map[Key]ScanCode
 // ScanCode returns the corresponding Windows Scan Code (not a VK!)
 // for the given key. (Virtual keys should be determined by the
 // host OS using the current keyboard layout.)
-func (k Key) ScanCode() ScanCode {
-
-	if w, ok := scanCodes[k]; ok {
-		return w
-	}
-	return 0
-}
+func (k Key) ScanCode() ScanCode { _ = "STUB: not implemented"; return *new(ScanCode) }
 
 // WinVK represents a windows virtual key code.
 // These are similar to base keys, but multiple scanned key codes
@@ -350,12 +335,7 @@ var baseKeys map[Key]BaseKey
 // If no corresponding value can be found, then zero is returned.  Note that
 // some keys (such as F1) are valid, and recognized by Kitty, but do not use the
 // base key encoding because they use another reporting format.
-func (k Key) KittyBase() BaseKey {
-	if w, ok := baseKeys[k]; ok {
-		return w
-	}
-	return 0
-}
+func (k Key) KittyBase() BaseKey { _ = "STUB: not implemented"; return *new(BaseKey) }
 
 func init() {
 	// we place them in init to avoid incorrect processing in coverage checks.

@@ -24,25 +24,13 @@ type EventResize struct {
 
 // NewEventResize creates an EventResize with the new updated window size,
 // which is given in character cells.
-func NewEventResize(width, height int) *EventResize {
-	ws := WindowSize{
-		Width:  width,
-		Height: height,
-	}
-	ev := &EventResize{ws: ws}
-	ev.SetEventNow()
-	return ev
-}
+func NewEventResize(width, height int) *EventResize { _ = "STUB: not implemented"; return nil }
 
 // Size returns the new window size as width, height in character cells.
-func (ev *EventResize) Size() (int, int) {
-	return ev.ws.Width, ev.ws.Height
-}
+func (ev *EventResize) Size() (int, int) { _ = "STUB: not implemented"; return 0, 0 }
 
 // PixelSize returns the new window size as width, height in pixels. The size
 // will be 0,0 if the screen doesn't support this feature
-func (ev *EventResize) PixelSize() (int, int) {
-	return ev.ws.PixelWidth, ev.ws.PixelHeight
-}
+func (ev *EventResize) PixelSize() (int, int) { _ = "STUB: not implemented"; return 0, 0 }
 
 type WindowSize = tty.WindowSize

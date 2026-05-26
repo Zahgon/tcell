@@ -44,15 +44,15 @@ const (
 	ModNumLock
 )
 
-func (m Modifier) IsShift() bool    { return (m & (ModLShift | ModRShift)) != 0 }
-func (m Modifier) IsCtrl() bool     { return (m & (ModLCtrl | ModRCtrl)) != 0 }
-func (m Modifier) IsAlt() bool      { return (m & (ModLAlt | ModRAlt)) != 0 }
-func (m Modifier) IsMeta() bool     { return (m & (ModLMeta | ModRMeta)) != 0 }
-func (m Modifier) IsHyper() bool    { return (m & (ModLHyper | ModRHyper)) != 0 }
-func (m Modifier) IsNumLock() bool  { return m&ModNumLock != 0 }
-func (m Modifier) IsCapsLock() bool { return m&ModCapsLock != 0 }
-func (m Modifier) IsCapitals() bool { return m.IsCapsLock() != m.IsShift() }
-func (m Modifier) IsAltGr() bool    { return m.IsCtrl() && m.IsAlt() }
+func (m Modifier) IsShift() bool    { _ = "STUB: not implemented"; return false }
+func (m Modifier) IsCtrl() bool     { _ = "STUB: not implemented"; return false }
+func (m Modifier) IsAlt() bool      { _ = "STUB: not implemented"; return false }
+func (m Modifier) IsMeta() bool     { _ = "STUB: not implemented"; return false }
+func (m Modifier) IsHyper() bool    { _ = "STUB: not implemented"; return false }
+func (m Modifier) IsNumLock() bool  { _ = "STUB: not implemented"; return false }
+func (m Modifier) IsCapsLock() bool { _ = "STUB: not implemented"; return false }
+func (m Modifier) IsCapitals() bool { _ = "STUB: not implemented"; return false }
+func (m Modifier) IsAltGr() bool    { _ = "STUB: not implemented"; return false }
 
 // Button is the mouse button pressed or released.
 type Button int
@@ -87,47 +87,6 @@ type MouseEvent struct {
 }
 
 // encodeButton just encodes the XTerm style button details into a byte
-func (ev MouseEvent) encodeButton() byte {
-	var btn byte
-	switch ev.Button {
-	case NoButton:
-		btn = 3
-	case Button1:
-		btn = 0
-	case Button2: // intentionally reversed with button 3
-		btn = 2
-	case Button3:
-		btn = 1
-	case WheelUp:
-		btn = 0x40
-	case WheelDown:
-		btn = 0x41
-	case WheelLeft:
-		btn = 0x42
-	case WheelRight:
-		btn = 0x43
-	case Button4:
-		btn = 0x80
-	case Button5:
-		btn = 0x81
-	case Button6:
-		btn = 0x82
-	case Button7:
-		btn = 0x83
-	default:
-		btn = 3
-	}
-	if ev.Motion {
-		btn += 0x20
-	}
-	if ev.Mod.IsShift() {
-		btn += 4
-	}
-	if ev.Mod.IsAlt() || ev.Mod.IsMeta() {
-		btn += 8
-	}
-	if ev.Mod.IsCtrl() {
-		btn += 16
-	}
-	return btn
-}
+func (ev MouseEvent) encodeButton() byte { _ = "STUB: not implemented"; return 0 }
+
+// intentionally reversed with button 3

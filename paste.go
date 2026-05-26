@@ -30,28 +30,30 @@ type EventPaste struct {
 
 // When returns the time when this EventPaste was created.
 func (ev *EventPaste) When() time.Time {
-	return ev.t
+	_ = "STUB: not implemented"
+
+	// Start returns true if this is the start of a paste.
+	return *new(time.Time)
 }
 
-// Start returns true if this is the start of a paste.
 func (ev *EventPaste) Start() bool {
-	return ev.start
+	_ = "STUB: not implemented"
+
+	// End returns true if this is the end of a paste.
+	return false
 }
 
-// End returns true if this is the end of a paste.
 func (ev *EventPaste) End() bool {
-	return !ev.start
+	_ = "STUB: not implemented"
+
+	// NewEventPaste returns a new EventPaste.
+	return false
 }
 
-// NewEventPaste returns a new EventPaste.
-func NewEventPaste(start bool) *EventPaste {
-	return &EventPaste{t: time.Now(), start: start}
-}
+func NewEventPaste(start bool) *EventPaste { _ = "STUB: not implemented"; return nil }
 
 // NewEventClipboard returns a new NewEventClipboard with a data payload
-func NewEventClipboard(data []byte) *EventClipboard {
-	return &EventClipboard{t: time.Now(), data: data}
-}
+func NewEventClipboard(data []byte) *EventClipboard { _ = "STUB: not implemented"; return nil }
 
 // EventClipboard represents data from the clipboard,
 // in response to a GetClipboard request.
@@ -62,10 +64,10 @@ type EventClipboard struct {
 
 // Data returns the attached binary data.
 func (ev *EventClipboard) Data() []byte {
-	return ev.data
+	_ = "STUB: not implemented"
+
+	// When returns the time when this event was created.
+	return nil
 }
 
-// When returns the time when this event was created.
-func (ev *EventClipboard) When() time.Time {
-	return ev.t
-}
+func (ev *EventClipboard) When() time.Time { _ = "STUB: not implemented"; return *new(time.Time) }

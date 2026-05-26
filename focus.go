@@ -23,8 +23,4 @@ type EventFocus struct {
 	Focused bool
 }
 
-func NewEventFocus(focused bool) *EventFocus {
-	ev := &EventFocus{Focused: focused}
-	ev.SetEventNow()
-	return ev
-}
+func NewEventFocus(focused bool) *EventFocus { _ = "STUB: not implemented"; return nil }

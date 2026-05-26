@@ -18,13 +18,7 @@
 package tty
 
 import (
-	"bufio"
-	"errors"
-	"fmt"
-	"io"
 	"os"
-	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -58,209 +52,88 @@ type p9Tty struct {
 	stopCh   chan struct{}
 }
 
-func NewDevTty() (Tty, error) { // tcell signature
-	return newPlan9TTY()
+func NewDevTty() (Tty, error) {
+	_ = "STUB: not implemented" // tcell signature
+	return *new(Tty), nil
 }
 
-func NewStdIoTty() (Tty, error) { // also required by tcell
+func NewStdIoTty() (Tty, error) {
+	_ = "STUB: not implemented" // also required by tcell
+	return *
 	// On Plan 9 there is no POSIX tty discipline on stdin/stdout;
 	// use /dev/cons explicitly for robustness.
-	return newPlan9TTY()
+	new(Tty), nil
 }
 
-func NewDevTtyFromDev(_ string) (Tty, error) { // required by tcell
+func NewDevTtyFromDev(_ string) (Tty, error) {
+	_ = "STUB: not implemented" // required by tcell
 	// Plan 9 does not have multiple "ttys" in the POSIX sense;
 	// always bind to /dev/cons and /dev/consctl.
-	return newPlan9TTY()
+	return *new(Tty), nil
 }
 
-func newPlan9TTY() (Tty, error) {
-	cons, err := os.OpenFile("/dev/cons", os.O_RDWR, 0)
-	if err != nil {
-		return nil, fmt.Errorf("open /dev/cons: %w", err)
-	}
-	consctl, err := os.OpenFile("/dev/consctl", os.O_WRONLY, 0)
-	if err != nil {
-		_ = cons.Close()
-		return nil, fmt.Errorf("open /dev/consctl: %w", err)
-	}
-	// /dev/wctl may not exist (console without rio); best-effort.
-	wctl, _ := os.OpenFile("/dev/wctl", os.O_RDWR, 0)
+func newPlan9TTY() (Tty, error) { _ = "STUB: not implemented"; return *new(Tty), nil }
 
-	t := &p9Tty{
-		cons:    cons,
-		consctl: consctl,
-		wctl:    wctl,
-		stopCh:  make(chan struct{}),
-	}
-	return t, nil
-}
+// /dev/wctl may not exist (console without rio); best-effort.
 
-func (t *p9Tty) Start() error {
+func (t *p9Tty) Start() error { _ = "STUB: not implemented"; return nil }
 
-	if t.started {
-		return nil
-	}
-	if t.closed.Load() {
-		return errors.New("tty closed")
-	}
+// Recreate stop channel if absent or closed (supports resume).
 
-	// Recreate stop channel if absent or closed (supports resume).
-	if t.stopCh == nil || isClosed(t.stopCh) {
-		t.stopCh = make(chan struct{})
-	}
+// Put console into raw mode; remains active while consctl is open.
 
-	// Put console into raw mode; remains active while consctl is open.
-	if _, err := t.consctl.Write([]byte("rawon")); err != nil {
-		return fmt.Errorf("enable raw mode: %w", err)
-	}
-
-	// Reopen /dev/wctl on resume; best-effort (system console may lack it).
-	if t.wctl == nil {
-		if f, err := os.OpenFile("/dev/wctl", os.O_RDWR, 0); err == nil {
-			t.wctl = f
-		}
-	}
-
-	if t.wctl != nil {
-		t.wg.Add(1)
-		go t.watchResize()
-	}
-	t.started = true
-	return nil
-}
+// Reopen /dev/wctl on resume; best-effort (system console may lack it).
 
 func (t *p9Tty) Drain() error {
+	_ = "STUB: not implemented"
 	// Per tcell docs, this may reasonably be a no-op on non-POSIX ttys.
 	// Read deadlines are not available on plan9 os.File; we rely on Stop().
 	return nil
 }
 
 func (t *p9Tty) Stop() error {
+	_ = "STUB: not implemented"
 
 	// Signal watcher to stop (if not already).
-	if t.stopCh != nil && !isClosed(t.stopCh) {
-		close(t.stopCh)
-	}
-
-	// Exit raw mode first.
-	_, _ = t.consctl.Write([]byte("rawoff"))
-
-	// Closing wctl unblocks watchResize; nil it so Start() can reopen later.
-	if t.wctl != nil {
-		_ = t.wctl.Close()
-		t.wctl = nil
-	}
-
-	// Ensure watcher goroutine has exited before returning.
-	t.wg.Wait()
-	t.started = false
 	return nil
 }
 
-func (t *p9Tty) Close() error {
+// Exit raw mode first.
 
-	if t.closed.Swap(true) {
-		return nil
-	}
+// Closing wctl unblocks watchResize; nil it so Start() can reopen later.
 
-	if t.stopCh != nil && !isClosed(t.stopCh) {
-		close(t.stopCh)
-	}
-	_, _ = t.consctl.Write([]byte("rawoff"))
+// Ensure watcher goroutine has exited before returning.
 
-	_ = t.cons.Close()
-	_ = t.consctl.Close()
-	if t.wctl != nil {
-		_ = t.wctl.Close()
-		t.wctl = nil
-	}
+func (t *p9Tty) Close() error { _ = "STUB: not implemented"; return nil }
 
-	t.wg.Wait()
-	return nil
-}
+func (t *p9Tty) Read(p []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-func (t *p9Tty) Read(p []byte) (int, error) {
-	return t.cons.Read(p)
-}
+func (t *p9Tty) Write(p []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-func (t *p9Tty) Write(p []byte) (int, error) {
-	return t.cons.Write(p)
-}
-
-func (t *p9Tty) NotifyResize(resizeQ chan<- bool) {
-	t.onResize.Store(resizeQ)
-}
+func (t *p9Tty) NotifyResize(resizeQ chan<- bool) { _ = "STUB: not implemented"; return }
 
 func (t *p9Tty) WindowSize() (WindowSize, error) {
+	_ = "STUB: not implemented"
 	// Strategy:
 	// 1) honor explicit overrides (TCELL_LINES/TCELL_COLS, LINES/COLUMNS),
 	// 2) otherwise return conservative 80x24.
 	// Reading /dev/wctl gives pixel geometry, but char cell metrics are
 	// not generally available to non-draw clients; vt(1) is fixed-cell.
-	lines, cols := envInt("TCELL_LINES"), envInt("TCELL_COLS")
-	if lines == 0 {
-		lines = envInt("LINES")
-	}
-	if cols == 0 {
-		cols = envInt("COLUMNS")
-	}
-	if lines <= 0 {
-		lines = 24
-	}
-	if cols <= 0 {
-		cols = 80
-	}
-	return WindowSize{Width: cols, Height: lines}, nil
+	return *new(WindowSize), nil
 }
 
 // watchResize blocks on /dev/wctl reads; each read returns when the window
 // changes size/position/state, per rio(4). We ignore the parsed geometry and
 // just notify tcell to re-query WindowSize().
-func (t *p9Tty) watchResize() {
-	defer t.wg.Done()
+func (t *p9Tty) watchResize() { _ = "STUB: not implemented"; return }
 
-	r := bufio.NewReader(t.wctl)
-	for {
-		select {
-		case <-t.stopCh:
-			return
-		default:
-		}
-		// Each read delivers something like:
-		// "   minx        miny        maxx        maxy   visible current\n"
-		// We don't need to parse here; just signal.
-		_, err := r.ReadString('\n')
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return
-			}
-			// transient errors: continue
-		}
-		if rq, ok := t.onResize.Load().(chan<- bool); ok && rq != nil {
-			select {
-			case rq <- true:
-			default:
-			}
-		}
-	}
-}
+// Each read delivers something like:
+// "   minx        miny        maxx        maxy   visible current\n"
+// We don't need to parse here; just signal.
 
-func envInt(name string) int {
-	if s := strings.TrimSpace(os.Getenv(name)); s != "" {
-		if v, err := strconv.Atoi(s); err == nil {
-			return v
-		}
-	}
-	return 0
-}
+// transient errors: continue
+
+func envInt(name string) int { _ = "STUB: not implemented"; return 0 }
 
 // helper: safe check if a channel is closed
-func isClosed(ch <-chan struct{}) bool {
-	select {
-	case <-ch:
-		return true
-	default:
-		return false
-	}
-}
+func isClosed(ch <-chan struct{}) bool { _ = "STUB: not implemented"; return false }

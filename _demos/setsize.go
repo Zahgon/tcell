@@ -26,16 +26,7 @@ import (
 	"github.com/gdamore/tcell/v3/encoding"
 )
 
-func displayDemo(s tcell.Screen) {
-	w, h := s.Size()
-	s.Clear()
-	style := tcell.StyleDefault.Foreground(color.CadetBlue.TrueColor()).Background(color.White)
-	sizeStr := fmt.Sprintf("%d x %d", w, h)
-	helpStr := "Use cursors to resize, ESC to exit."
-	s.PutStrStyled((w-len(sizeStr))/2, h/2, sizeStr, style)
-	s.PutStr((w-len(helpStr))/2, h/2+1, helpStr)
-	s.Show()
-}
+func displayDemo(s tcell.Screen) { _ = "STUB: not implemented"; return }
 
 // This program just prints "Hello, World!".  Press ESC to exit.
 func main() {

@@ -26,24 +26,7 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
-func displayHelloWorld(s tcell.Screen, secs int) {
-	w, h := s.Size()
-	s.Clear()
-	style := tcell.StyleDefault.Foreground(color.CadetBlue.TrueColor()).Background(color.White)
-	msg := "Notification Demo"
-	s.PutStrStyled((w-len(msg))/2, h/2-1, msg, style)
-	msg = "(Minimize This Window)"
-	s.PutStrStyled((w-len(msg))/2, h/2+1, msg, style)
-	if secs > 0 {
-		msg = fmt.Sprintf("Incoming in %d Seconds", secs)
-	} else {
-		msg = "Notification Sent!"
-	}
-	s.PutStr((w-len(msg))/2, h/2+3, msg)
-	msg = "Press ESC to exit, ENTER to restart."
-	s.PutStr((w-len(msg))/2, h/2+5, msg)
-	s.Show()
-}
+func displayHelloWorld(s tcell.Screen, secs int) { _ = "STUB: not implemented"; return }
 
 // This program just prints "Hello, World!".  Press ESC to exit.
 func main() {

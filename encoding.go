@@ -15,7 +15,6 @@
 package tcell
 
 import (
-	"strings"
 	"sync"
 
 	"golang.org/x/text/encoding"
@@ -61,12 +60,7 @@ var encodingFallback EncodingFallback = EncodingFallbackASCII
 //
 // The East Asian encodings have been seen to add 100-200K per encoding to the
 // size of the resulting binary.
-func RegisterEncoding(charset string, enc encoding.Encoding) {
-	encodingLk.Lock()
-	charset = strings.ToLower(charset)
-	encodings[charset] = enc
-	encodingLk.Unlock()
-}
+func RegisterEncoding(charset string, enc encoding.Encoding) { _ = "STUB: not implemented"; return }
 
 // EncodingFallback describes how the system behaves when the locale
 // requires a character set that we do not support.  The system always
@@ -94,30 +88,15 @@ const (
 // SetEncodingFallback changes the behavior of GetEncoding when a suitable
 // encoding is not found.  The default is EncodingFallbackFail, which
 // causes GetEncoding to simply return nil.
-func SetEncodingFallback(fb EncodingFallback) {
-	encodingLk.Lock()
-	encodingFallback = fb
-	encodingLk.Unlock()
-}
+func SetEncodingFallback(fb EncodingFallback) { _ = "STUB: not implemented"; return }
 
 // GetEncoding is used by Screen implementors who want to locate an encoding
 // for the given character set name.  Note that this will return nil for
 // either the Unicode (UTF-8) or ASCII encodings, since we don't use
 // encodings for them but instead have our own native methods.
 func GetEncoding(charset string) encoding.Encoding {
-	charset = strings.ToLower(charset)
-	encodingLk.Lock()
-	defer encodingLk.Unlock()
-	if enc, ok := encodings[charset]; ok {
-		return enc
-	}
-	switch encodingFallback {
-	case EncodingFallbackASCII:
-		return gencoding.ASCII
-	case EncodingFallbackUTF8:
-		return encoding.Nop
-	}
-	return nil
+	_ = "STUB: not implemented"
+	return *new(encoding.Encoding)
 }
 
 func init() {

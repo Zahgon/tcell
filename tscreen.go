@@ -19,22 +19,10 @@ package tcell
 
 import (
 	"bytes"
-	"encoding/base64"
-	"errors"
-	"fmt"
-	"io"
-	"maps"
-	"os"
-	"runtime"
-	"slices"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	"github.com/gdamore/tcell/v3/color"
-	"github.com/gdamore/tcell/v3/vt"
 	"golang.org/x/text/transform"
 )
 
@@ -47,7 +35,8 @@ import (
 // $COLUMNS environment variables can be set to the actual window size,
 // otherwise defaults taken from the terminal database are used.
 func NewTerminfoScreen(opts ...TerminfoScreenOption) (Screen, error) {
-	return NewTerminfoScreenFromTty(nil, opts...)
+	_ = "STUB: not implemented"
+	return *new(Screen), nil
 }
 
 type TerminfoScreenOption interface {
@@ -61,36 +50,30 @@ type TerminfoScreenOption interface {
 // 24-bit color as well.
 type OptColors int
 
-func (o OptColors) apply(t *tScreen) {
-	t.ncolor = min(int(o), 256)
-	t.truecolor = o > 256
-	t.noColor = o == 0
-}
+func (o OptColors) apply(t *tScreen) { _ = "STUB: not implemented"; return }
 
 // OptTerm overrides the detection of $TERM.
 type OptTerm string
 
 func (o OptTerm) apply(t *tScreen) {
-	t.term = string(o)
+	_ = "STUB: not implemented"
+
+	// OptAltScreen controls whether the alternate screen buffer is used.
+	// The default is true. The TCELL_ALTSCREEN=disable environment override
+	// is still honored.
+	return
 }
 
-// OptAltScreen controls whether the alternate screen buffer is used.
-// The default is true. The TCELL_ALTSCREEN=disable environment override
-// is still honored.
 type OptAltScreen bool
 
-func (o OptAltScreen) apply(t *tScreen) {
-	t.altScreen = bool(o)
-}
+func (o OptAltScreen) apply(t *tScreen) { _ = "STUB: not implemented"; return }
 
 // OptSanitizeContent enables stripping control characters from content passed
 // to Put and PutStr. This is safer, but a little slower than leaving content
 // unsanitized.
 type OptSanitizeContent bool
 
-func (o OptSanitizeContent) apply(t *tScreen) {
-	t.cells.sanitizeContent = bool(o)
-}
+func (o OptSanitizeContent) apply(t *tScreen) { _ = "STUB: not implemented"; return }
 
 // OptAdvancedKeys enables richer key reporting where supported.  In this mode
 // key events may include release state, repeat counts, and physical keys, and
@@ -99,25 +82,19 @@ func (o OptSanitizeContent) apply(t *tScreen) {
 // rather than KeyBacktab.
 type OptAdvancedKeys bool
 
-func (o OptAdvancedKeys) apply(t *tScreen) {
-	t.advancedKeys = bool(o)
-}
+func (o OptAdvancedKeys) apply(t *tScreen) { _ = "STUB: not implemented"; return }
 
 // OptKeyboardProtocol forces the keyboard reporting protocol instead of using
 // startup negotiation. The zero value forces legacy keyboard reporting.
 type OptKeyboardProtocol KeyProtocol
 
-func (o OptKeyboardProtocol) apply(t *tScreen) {
-	t.forceKeyboardProtocol(KeyProtocol(o))
-}
+func (o OptKeyboardProtocol) apply(t *tScreen) { _ = "STUB: not implemented"; return }
 
 // OptNegotiation controls whether terminal capabilities are negotiated during
 // startup. The default is true.
 type OptNegotiation bool
 
-func (o OptNegotiation) apply(t *tScreen) {
-	t.negotiate = bool(o)
-}
+func (o OptNegotiation) apply(t *tScreen) { _ = "STUB: not implemented"; return }
 
 // OptControlStringLimit sets the maximum inbound control-string payload size
 // accepted from the terminal before the parser drops the sequence. This limits
@@ -126,9 +103,7 @@ func (o OptNegotiation) apply(t *tScreen) {
 // 64 KiB; a value of 0 disables the limit.
 type OptControlStringLimit int
 
-func (o OptControlStringLimit) apply(t *tScreen) {
-	t.controlStringLimit = max(int(o), 0)
-}
+func (o OptControlStringLimit) apply(t *tScreen) { _ = "STUB: not implemented"; return }
 
 // Some terminal escapes that are basically universal.
 // We would really like to be able to use private mode queries for some of
@@ -191,24 +166,8 @@ const (
 // is presumed, at least on UNIX hosts. (Windows hosts will typically fail this
 // call altogether.)
 func NewTerminfoScreenFromTty(tty Tty, opts ...TerminfoScreenOption) (Screen, error) {
-	t := &tScreen{
-		tty:                tty,
-		altScreen:          true,
-		negotiate:          true,
-		controlStringLimit: defaultControlStringLimit,
-	}
-
-	t.prepareCursorStyles()
-	t.prepareExtendedOSC()
-	t.buildAcsMap()
-	t.resizeQ = make(chan bool, 1)
-	t.fallback = make(map[rune]string)
-	maps.Copy(t.fallback, RuneFallbacks)
-	for _, o := range opts {
-		o.apply(t)
-	}
-
-	return &baseScreen{screenImpl: t}, nil
+	_ = "STUB: not implemented"
+	return *new(Screen), nil
 }
 
 // tScreen represents a screen backed by a terminfo implementation.
@@ -287,924 +246,241 @@ type tScreen struct {
 	sync.Mutex
 }
 
-func (t *tScreen) useAltScreen() bool {
-	return t.altScreen && os.Getenv("TCELL_ALTSCREEN") != "disable"
-}
+func (t *tScreen) useAltScreen() bool { _ = "STUB: not implemented"; return false }
 
-func validKeyboardProtocol(p KeyProtocol) bool {
-	switch p {
-	case LegacyKeyboard, KittyKeyboard, Win32Keyboard, XTermKeyboard:
-		return true
-	default:
-		return false
-	}
-}
+func validKeyboardProtocol(p KeyProtocol) bool { _ = "STUB: not implemented"; return false }
 
 func parseKeyboardProtocol(s string) (KeyProtocol, bool) {
-	switch s {
-	case "legacy":
-		return LegacyKeyboard, true
-	case "kitty":
-		return KittyKeyboard, true
-	case "win32":
-		return Win32Keyboard, true
-	case "xterm":
-		return XTermKeyboard, true
-	default:
-		return LegacyKeyboard, false
-	}
+	_ = "STUB: not implemented"
+	return *new(KeyProtocol), false
 }
 
 func (t *tScreen) forceKeyboardProtocol(p KeyProtocol) bool {
-	if !validKeyboardProtocol(p) {
-		return false
-	}
-	t.forcedKbd = p
-	t.forceKbd = true
-	return true
+	_ = "STUB: not implemented"
+	return false
 }
 
-func (t *tScreen) applyKeyboardProtocolOverride() {
-	if !t.forceKbd {
-		return
-	}
-	t.haveKittyKbd = t.forcedKbd == KittyKeyboard
-	t.haveWin32Kbd = t.forcedKbd == Win32Keyboard
-	t.haveXTermKbd = t.forcedKbd == XTermKeyboard
-}
+func (t *tScreen) applyKeyboardProtocolOverride() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) applyEnvironmentOverrides() {
-	switch os.Getenv("TCELL_KEYBOARD_PROTOCOL") {
-	case "auto":
-		t.forceKbd = false
-	case "":
-	default:
-		if p, ok := parseKeyboardProtocol(os.Getenv("TCELL_KEYBOARD_PROTOCOL")); ok {
-			t.forceKeyboardProtocol(p)
-		}
-	}
+func (t *tScreen) applyEnvironmentOverrides() { _ = "STUB: not implemented"; return }
 
-	switch os.Getenv("TCELL_NEGOTIATE") {
-	case "auto":
-		t.negotiate = true
-	case "disable":
-		t.negotiate = false
-	}
+func (t *tScreen) Init() error { _ = "STUB: not implemented"; return nil }
 
-	t.mouseDisabled = os.Getenv("TCELL_MOUSE") == "disable"
-}
+// environment overrides
 
-func (t *tScreen) Init() error {
-	if e := t.initialize(); e != nil {
-		return e
-	}
+// On Windows, enable 24-bit color by default (all terminals there are 24-bit capable)
 
-	t.startTime = time.Now()
-	t.keyQ = make(chan []byte, 10)
+// base 8-bit palette
 
-	t.charset = getCharset()
-	if enc := GetEncoding(t.charset); enc != nil {
-		t.encoder = enc.NewEncoder()
-		t.decoder = enc.NewDecoder()
-	} else {
-		return ErrNoCharset
-	}
+// monochrome variants
 
-	// environment overrides
-	w := 80
-	h := 24
-	if i, _ := strconv.Atoi(os.Getenv("LINES")); i != 0 {
-		h = i
-	}
-	if i, _ := strconv.Atoi(os.Getenv("COLUMNS")); i != 0 {
-		w = i
-	}
-	if t.term == "" {
-		t.term = os.Getenv("TERM")
-	}
-	nterm := t.term
+// legacy DEC VT 100/220 etc. family.  (technically the VT525 can do ANSI, but they should set to ansi)
 
-	if t.ncolor == 0 && !t.noColor {
-		cterm := os.Getenv("COLORTERM")
+// best guess - this covers all the modern variants like ghostty,
 
-		// On Windows, enable 24-bit color by default (all terminals there are 24-bit capable)
-		if runtime.GOOS == "windows" {
-			t.truecolor = true
-			t.ncolor = 256
-		} else if slices.Contains([]string{"truecolor", "direct", "24bit"}, cterm) || strings.HasSuffix(nterm, "-direct") || strings.HasSuffix(nterm, "-truecolor") {
-			t.truecolor = true
-			t.ncolor = 256 // base 8-bit palette
-		} else if strings.HasSuffix(nterm, "-256color") || strings.Contains(cterm, "256") {
-			t.ncolor = 256
-		} else if strings.HasSuffix(nterm, "-88color") {
-			t.ncolor = 88
-		} else if strings.HasSuffix(nterm, "-16color") {
-			t.ncolor = 16
-		} else if strings.Contains(nterm, "color") || cterm != "" {
-			t.ncolor = 8
-		} else if strings.Contains(nterm, "mono") || strings.HasSuffix(nterm, "-m") { // monochrome variants
-			t.ncolor = 0
-		} else if strings.Contains(nterm, "ansi") || slices.Contains([]string{"dtterm", "xterm", "aixterm", "linux"}, nterm) {
-			t.ncolor = 8
-		} else if strings.HasPrefix(nterm, "vt") || nterm == "sun" {
-			// legacy DEC VT 100/220 etc. family.  (technically the VT525 can do ANSI, but they should set to ansi)
-			t.ncolor = 0
-		} else {
-			// best guess - this covers all the modern variants like ghostty,
-			t.ncolor = 256
-		}
-		if os.Getenv("NO_COLOR") != "" {
-			t.truecolor = false
-			t.ncolor = 0
-			t.noColor = true
-		}
-		// A user who wants to have his themes honored can set this environment variable.
-		if os.Getenv("TCELL_TRUECOLOR") == "disable" {
-			t.truecolor = false
-		}
-	}
+// A user who wants to have his themes honored can set this environment variable.
 
-	if strings.HasPrefix(nterm, "vt") || strings.Contains(nterm, "ansi") || nterm == "linux" || nterm == "sun" || nterm == "sun-color" {
-		// these terminals are "legacy" and not expected to support most OSC functions
-		t.legacy = true
-	}
+// these terminals are "legacy" and not expected to support most OSC functions
 
-	t.applyEnvironmentOverrides()
+// clip to reasonable limits
 
-	t.initted = false
-	t.quit = make(chan struct{})
-	t.initQ = make(chan Event, 32)
-	t.eventQ = make(chan Event, 128)
-	t.input = newInputParser(t.filterEvents())
-	t.input.advanced = t.advancedKeys
-	t.input.controlStringMax = t.controlStringLimit
-
-	t.Lock()
-	t.cx = -1
-	t.cy = -1
-	t.style = StyleDefault
-	t.cells.Resize(w, h)
-	t.cursorx = -1
-	t.cursory = -1
-	t.resize()
-	t.Unlock()
-
-	if err := t.engage(); err != nil {
-		return err
-	}
-
-	// clip to reasonable limits
-	nColors := min(t.ncolor, 256)
-	t.colors = make(map[color.Color]color.Color, nColors)
-	t.palette = make([]color.Color, nColors)
-	for i := range nColors {
-		t.palette[i] = color.PaletteColor(i)
-		// identity map for our builtin colors
-		t.colors[color.PaletteColor(i)] = color.PaletteColor(i)
-	}
-
-	return nil
-}
+// identity map for our builtin colors
 
 func (t *tScreen) processInitQ() {
+	_ = "STUB: not implemented"
 	// NB: called with lock held
-	if t.initted {
-		return
-	}
-
-	expire := time.After(time.Second)
-
-	for {
-		select {
-		case <-expire:
-			t.initted = true
-			return
-		case ev := <-t.initQ:
-			switch ev := ev.(type) {
-			case *eventPrimaryAttributes:
-				if ev.Color && t.ncolor == 0 && !t.noColor {
-					t.ncolor = 8
-				}
-				if ev.Clipboard && t.setClipboard == "" {
-					t.setClipboard = setClipboard
-				}
-				t.hasClipboard = ev.Clipboard
-				t.initted = true
-				return
-			case *eventTermName:
-				// terminal specific overrides
-				t.termName = ev.Name
-				t.termVers = ev.Version
-				switch ev.Name {
-				case "iTerm2":
-					// Some terminals can use OSC 9.  Unfortunately we can only discover
-					// them using this means.  It appears that pretty much all of them
-					// except iTerm2 also support more standard OSC 777, and it seems like
-					// only Kitty has its OSC 99 thing, but it also does OSC 777 well.
-					t.notifyDesktop = notifyDesktop9
-				}
-			case *eventPrivateMode:
-				switch ev.Mode {
-				case vt.PmResizeReports:
-					t.inlineResize = ev.Status.Changeable()
-				case vt.PmMouseSgr:
-					t.haveMouseSgr = ev.Status.Changeable()
-				case vt.PmMouseButton:
-					t.haveMouse = ev.Status.Changeable()
-				case vt.PmWin32Input:
-					t.haveWin32Kbd = ev.Status.Changeable()
-				}
-			case *eventKittyKbdMode:
-				t.haveKittyKbd = true
-			case *eventXTermKbdMode:
-				t.haveXTermKbd = true
-			}
-		}
-	}
+	return
 }
 
-func (t *tScreen) filterEvents() chan Event {
-	inQ := make(chan Event, 128)
-	go func() {
-		for {
-			var ev Event
-			select {
-			case ev = <-inQ:
-			case <-t.quit:
-				return
-			}
-			switch ev.(type) {
-			case *eventTermName, *eventPrimaryAttributes, *eventPrivateMode, *eventKittyKbdMode, *eventXTermKbdMode:
-				select {
-				case t.initQ <- ev:
-				default:
-				}
+// terminal specific overrides
 
-			default:
-				t.eventQ <- ev
-			}
-		}
-	}()
-	return inQ
-}
+// Some terminals can use OSC 9.  Unfortunately we can only discover
+// them using this means.  It appears that pretty much all of them
+// except iTerm2 also support more standard OSC 777, and it seems like
+// only Kitty has its OSC 99 thing, but it also does OSC 777 well.
 
-func (t *tScreen) prepareExtendedOSC() {
-	if t.legacy {
-		return
-	}
+func (t *tScreen) filterEvents() chan Event { _ = "STUB: not implemented"; return nil }
 
-	// OSC 8 is for enter/exit URL.
-	t.enterUrl = "\x1b]8;%[2]s;%[1]s\x1b\\"
-	t.exitUrl = "\x1b]8;;\x1b\\"
+func (t *tScreen) prepareExtendedOSC() { _ = "STUB: not implemented"; return }
 
-	// CSI .. t is for window operations.
-	t.setWinSize = "\x1b[8;%[2]d;%[1]dt"
-	t.saveTitle = "\x1b[22;2t"
-	t.restoreTitle = "\x1b[23;2t"
-	// this also tries to request that UTF-8 is allowed in the title
-	t.setTitle = "\x1b[>2t\x1b]2;%s\x1b\\"
+// OSC 8 is for enter/exit URL.
 
-	// OSC 52 is for saving to the clipboard.
-	// this string takes a base64 string and sends it to the clipboard.
-	// it will also be able to retrieve the clipboard using "?" as the
-	// sent string, when we support that.
-	t.setClipboard = setClipboard
+// CSI .. t is for window operations.
 
-	// OSC 777 is the desktop notification supported by a variety of
-	// newer terminals.  (There was also OSC 9 and OSC 99, but they
-	// are not as widely deployed, and OSC 9 is not unique.)
-	t.notifyDesktop = notifyDesktop777
-}
+// this also tries to request that UTF-8 is allowed in the title
 
-func (t *tScreen) prepareCursorStyles() {
-	t.cursorStyles = map[CursorStyle]string{
-		CursorStyleDefault:           "\x1b[0 q",
-		CursorStyleBlinkingBlock:     "\x1b[1 q",
-		CursorStyleSteadyBlock:       "\x1b[2 q",
-		CursorStyleBlinkingUnderline: "\x1b[3 q",
-		CursorStyleSteadyUnderline:   "\x1b[4 q",
-		CursorStyleBlinkingBar:       "\x1b[5 q",
-		CursorStyleSteadyBar:         "\x1b[6 q",
-	}
-	if t.legacy {
-		return
-	}
-	if t.cursorRGB == "" {
-		t.cursorRGB = "\x1b]12;#%02x%02x%02x\007"
-		t.cursorFg = "\x1b]112\007"
-	}
-}
+// OSC 52 is for saving to the clipboard.
+// this string takes a base64 string and sends it to the clipboard.
+// it will also be able to retrieve the clipboard using "?" as the
+// sent string, when we support that.
+
+// OSC 777 is the desktop notification supported by a variety of
+// newer terminals.  (There was also OSC 9 and OSC 99, but they
+// are not as widely deployed, and OSC 9 is not unique.)
+
+func (t *tScreen) prepareCursorStyles() { _ = "STUB: not implemented"; return }
 
 func (t *tScreen) Fini() {
+	_ = "STUB: not implemented"
 	// Ensure that enough time passes for terminals to  finish sending
 	// their initial response (gnome-terminal sends terminal dimensions
 	// asynchronously later than the response to primary DA for some reason.)
-	if time.Since(t.startTime) < 50*time.Millisecond {
-		time.Sleep(time.Millisecond * 50)
-	}
-	t.finiOnce.Do(t.finish)
+	return
 }
 
-func (t *tScreen) finish() {
-	t.Lock()
-	t.fini = true
-	t.Unlock()
-	close(t.quit)
-	t.finalize()
-}
+func (t *tScreen) finish() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) SetStyle(style Style) {
-	t.Lock()
-	if !t.fini {
-		t.style = style
-	}
-	t.Unlock()
-}
+func (t *tScreen) SetStyle(style Style) { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) encodeStr(s string) []byte {
+func (t *tScreen) encodeStr(s string) []byte { _ = "STUB: not implemented"; return nil }
 
-	var dstBuf [128]byte
-	var buf []byte
-	nb := dstBuf[:]
-	dst := 0
-	var err error
-	if enc := t.encoder; enc != nil {
-		enc.Reset()
-		dst, _, err = enc.Transform(nb, []byte(s), true)
-	}
-	if err != nil || dst == 0 || nb[0] == '\x1a' {
-		// Combining characters are elided
-		r, _ := utf8.DecodeRuneInString(s)
-		if len(buf) == 0 {
-			if acs, ok := t.acs[r]; ok {
-				buf = append(buf, []byte(acs)...)
-			} else if fb, ok := t.fallback[r]; ok {
-				buf = append(buf, []byte(fb)...)
-			} else {
-				buf = append(buf, '?')
-			}
-		}
-	} else {
-		buf = append(buf, nb[:dst]...)
-	}
-
-	return buf
-}
+// Combining characters are elided
 
 // resolvePalette looks up a color to obtain the palette entry for it.
-func (t *tScreen) resolvePalette(c Color) Color {
-	if v, ok := t.colors[c]; ok {
-		return v
-	}
-	v := color.Find(c, t.palette)
-	t.colors[c] = v
-	return v
-}
+func (t *tScreen) resolvePalette(c Color) Color { _ = "STUB: not implemented"; return *new(Color) }
 
 // sendFgBg sends the foreground and background.  It is assumed that sgr0
 // was already emitted prior to calling this (so colors are already in default).
 func (t *tScreen) sendFgBg(fg Color, bg Color, attr AttrMask) AttrMask {
-	if t.Colors() == 0 {
-		// foreground vs background, we calculate luminance
-		// and possibly do a reverse video
-		if !fg.Valid() {
-			return attr
-		}
-		v, ok := t.colors[fg]
-		if !ok {
-			v = color.Find(fg, []Color{ColorBlack, ColorWhite})
-			t.colors[fg] = v
-		}
-		switch v {
-		case ColorWhite:
-			return attr
-		case ColorBlack:
-			return attr ^ AttrReverse
-		}
-	}
+	_ = "STUB: not implemented"
+	return *
 
-	if t.truecolor {
-		if fg.IsRGB() && bg.IsRGB() {
-			r1, g1, b1 := fg.RGB()
-			r2, g2, b2 := bg.RGB()
-			t.Printf(setFgBgRgb, r1, g1, b1, r2, g2, b2)
-			return attr
-		}
-
-		if fg.IsRGB() {
-			r, g, b := fg.RGB()
-			t.Printf(setFgRgb, r, g, b)
-			fg = ColorDefault
-		}
-
-		if bg.IsRGB() {
-			r, g, b := bg.RGB()
-			t.Printf(setBgRgb, r, g, b)
-			bg = ColorDefault
-		}
-	}
-
-	if fg.Valid() {
-		fg = t.resolvePalette(fg)
-		fgc := fg & 0xffffff
-		if fgc < 8 {
-			t.Printf(setFg8, fgc)
-		} else if fgc < 256 {
-			t.Printf(setFg256, fgc)
-		}
-	}
-
-	if bg.Valid() {
-		bg = t.resolvePalette(bg)
-		bgc := bg & 0xffffff
-		if bgc < 8 {
-			t.Printf(setBg8, bgc)
-		} else if bgc < 256 {
-			t.Printf(setBg256, bgc)
-		}
-	}
-
-	return attr
+	// foreground vs background, we calculate luminance
+	// and possibly do a reverse video
+	new(AttrMask)
 }
 
 // emitAttrs dumps prints the attributes, aside from underline that is special
 // The assumption is that sgr0 was already printed ahead of this.
-func (t *tScreen) emitAttrs(attrs AttrMask) {
-
-	if attrs&AttrBold != 0 {
-		t.Print(bold)
-	}
-	if attrs&AttrReverse != 0 {
-		t.Print(reverse)
-	}
-	if attrs&AttrBlink != 0 {
-		t.Print(blink)
-	}
-	if attrs&AttrDim != 0 {
-		t.Print(dim)
-	}
-	if attrs&AttrItalic != 0 {
-		t.Print(italic)
-	}
-	if attrs&AttrStrikeThrough != 0 {
-		t.Print(strikeThrough)
-	}
-}
+func (t *tScreen) emitAttrs(attrs AttrMask) { _ = "STUB: not implemented"; return }
 
 // emitUl dumps prints the underline, which may be colored.
 // The assumption is that sgr0 was already printed ahead of this.
-func (t *tScreen) emitUnderline(us UnderlineStyle, uc Color) {
-	if us != UnderlineStyleNone {
-		// NB: under color should have been reset by sgr0
-		if uc.IsRGB() {
-			r, g, b := uc.RGB()
-			uc = t.resolvePalette(uc)
-			t.Printf(underColor, uc&0xff)
-			t.Printf(underRGB, r, g, b)
-		} else if uc.Valid() {
-			t.Printf(underColor, uc&0xff)
-		}
+func (t *tScreen) emitUnderline(us UnderlineStyle, uc Color) { _ = "STUB: not implemented"; return }
 
-		t.Print(underline) // to ensure everyone gets at least a basic underline
-		switch us {
-		case UnderlineStyleDouble:
-			t.Print(doubleUnder)
-		case UnderlineStyleCurly:
-			t.Print(curlyUnder)
-		case UnderlineStyleDotted:
-			t.Print(dottedUnder)
-		case UnderlineStyleDashed:
-			t.Print(dashedUnder)
-		}
-	}
-}
+// NB: under color should have been reset by sgr0
+
+// to ensure everyone gets at least a basic underline
 
 // emitUrl either emits a url (OSC 8), or if the string is empty
 // then the OSC 8 to exit the URL.  It should only be called if we
 // either have a new URL, or need to exit an old one, as it always emits
 // the OSC 8 sequence (if OSC 8 is supported).
-func (t *tScreen) emitUrl(u urlInfo) {
-	if t.enterUrl != "" {
-		if u.url != "" {
-			t.Printf(t.enterUrl, u.url, u.id)
-		} else {
-			t.Print(t.exitUrl)
-		}
-	}
-}
+func (t *tScreen) emitUrl(u urlInfo) { _ = "STUB: not implemented"; return }
 
 // urlNeedsEmission reports whether a hyperlink transition has any wire effect.
 // Url ids can be staged before the Url itself, and id-only transitions have no
 // OSC 8 representation of their own.
-func urlNeedsEmission(oldUrl, newUrl urlInfo) bool {
-	return oldUrl != newUrl && (oldUrl.url != "" || newUrl.url != "")
-}
+func urlNeedsEmission(oldUrl, newUrl urlInfo) bool { _ = "STUB: not implemented"; return false }
 
-func (t *tScreen) drawCell(x, y int) int {
+func (t *tScreen) drawCell(x, y int) int { _ = "STUB: not implemented"; return 0 }
 
-	str, style, width := t.cells.Get(x, y)
-	if !t.cells.Dirty(x, y) {
-		return width
-	}
+// URL string can be long, so don't send it unless we really need to.
 
-	if t.cy != y || t.cx != x {
-		t.Printf(setCursorPosition, y+1, x+1)
-		t.cx = x
-		t.cy = y
-	}
+// now emit runes - taking care to not overrun width with a
+// wide character, and to ensure that we emit exactly one regular
+// character followed up by any residual combing characters
 
-	if style == StyleDefault {
-		style = t.style
-	}
-	if style != t.curstyle {
-		fg, bg, attrs := style.fg, style.bg, style.attrs
+// No FullWidth character support
 
-		t.Print(sgr0)
+// too wide to fit; emit a single space instead
 
-		attrs = t.sendFgBg(fg, bg, attrs)
-		t.emitAttrs(attrs)
-		t.emitUnderline(style.ulStyle, style.ulColor)
+// Clobber over any content in the next cell.
+// This fixes a problem with some terminals where overwriting two
+// adjacent single cells with a wide rune would leave an image
+// of the second cell.  This is a workaround for buggy terminals.
 
-		var newUrl urlInfo
-		var oldUrl urlInfo
-		if t.curstyle.url != nil {
-			oldUrl = *t.curstyle.url
-		}
-		if style.url != nil {
-			newUrl = *style.url
-		}
-		// URL string can be long, so don't send it unless we really need to.
-		if urlNeedsEmission(oldUrl, newUrl) {
-			t.emitUrl(newUrl)
-		}
+func (t *tScreen) ShowCursor(x, y int) { _ = "STUB: not implemented"; return }
 
-		t.curstyle = style
-	}
+func (t *tScreen) SetCursor(cs CursorStyle, cc Color) { _ = "STUB: not implemented"; return }
 
-	// now emit runes - taking care to not overrun width with a
-	// wide character, and to ensure that we emit exactly one regular
-	// character followed up by any residual combing characters
+func (t *tScreen) HideCursor() { _ = "STUB: not implemented"; return }
 
-	if width < 1 {
-		width = 1
-	}
+func (t *tScreen) showCursor() { _ = "STUB: not implemented"; return }
 
-	buf := t.encodeStr(str)
-	str = string(buf)
+func (t *tScreen) Write(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-	if width > 1 && str == "?" {
-		// No FullWidth character support
-		str = "? "
-		t.cx = -1
-	}
+func (t *tScreen) Print(s string) { _ = "STUB: not implemented"; return }
 
-	if x > t.w-width {
-		// too wide to fit; emit a single space instead
-		width = 1
-		str = " "
-	}
-	if width > 1 && x+width < t.w {
-		// Clobber over any content in the next cell.
-		// This fixes a problem with some terminals where overwriting two
-		// adjacent single cells with a wide rune would leave an image
-		// of the second cell.  This is a workaround for buggy terminals.
-		t.Print("  \b\b")
-	}
-	t.Print(str)
-	t.cx += width
-	t.cells.SetDirty(x, y, false)
-	if width > 1 && len([]rune(str)) > 1 {
-		t.cx = -1
-	}
+func (t *tScreen) Printf(f string, args ...any) { _ = "STUB: not implemented"; return }
 
-	return width
-}
+func (t *tScreen) Show() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) ShowCursor(x, y int) {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.cursorx = x
-	t.cursory = y
-	t.Unlock()
-}
+func (t *tScreen) clearScreen() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) SetCursor(cs CursorStyle, cc Color) {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.cursorStyle = cs
-	t.cursorColor = cc
-	t.Unlock()
-}
+func (t *tScreen) startBuffering() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) HideCursor() {
-	t.ShowCursor(-1, -1)
-}
-
-func (t *tScreen) showCursor() {
-
-	x, y := t.cursorx, t.cursory
-	w, h := t.cells.Size()
-	if x < 0 || y < 0 || x >= w || y >= h {
-		t.hideCursor()
-		return
-	}
-	t.Printf(setCursorPosition, y+1, x+1)
-	t.Print(vt.PmShowCursor.Enable())
-	if t.cursorStyles != nil {
-		if esc, ok := t.cursorStyles[t.cursorStyle]; ok {
-			t.Print(esc)
-		}
-	}
-	if t.cursorRGB != "" {
-		if t.cursorColor == ColorReset {
-			t.Print(t.cursorFg)
-		} else if t.cursorColor.Valid() {
-			r, g, b := t.cursorColor.RGB()
-			t.Printf(t.cursorRGB, r, g, b)
-		}
-	}
-	t.cx = x
-	t.cy = y
-}
-
-func (t *tScreen) Write(b []byte) (int, error) {
-	if t.buffering {
-		return t.buf.Write(b)
-	}
-	return t.tty.Write(b)
-}
-
-func (t *tScreen) Print(s string) {
-	_, _ = io.WriteString(t, s)
-}
-
-func (t *tScreen) Printf(f string, args ...any) {
-	_, _ = fmt.Fprintf(t, f, args...)
-}
-
-func (t *tScreen) Show() {
-	t.Lock()
-	if !t.fini {
-		t.resize()
-		t.draw()
-	}
-	t.Unlock()
-}
-
-func (t *tScreen) clearScreen() {
-	t.Print(sgr0)
-	t.Print(t.exitUrl)
-	_ = t.sendFgBg(t.style.fg, t.style.bg, AttrNone)
-
-	t.Print(clear)
-
-	t.cls = false
-}
-
-func (t *tScreen) startBuffering() {
-	t.Print(vt.PmSyncOutput.Enable())
-}
-
-func (t *tScreen) endBuffering() {
-	t.Print(vt.PmSyncOutput.Disable())
-}
+func (t *tScreen) endBuffering() { _ = "STUB: not implemented"; return }
 
 func (t *tScreen) hideCursor() {
+	_ = "STUB: not implemented"
 	// just in case we cannot hide it, move it to the end
-	t.cx, t.cy = t.cells.Size()
-	t.Printf(setCursorPosition, t.cy+1, t.cx+1)
-	// then hide it
-	t.Print(vt.PmShowCursor.Disable())
+	return
 }
+
+// then hide it
 
 func (t *tScreen) draw() {
+	_ = "STUB: not implemented"
 	// clobber cursor position, because we're going to change it all
-	t.cx = -1
-	t.cy = -1
-	// make no style assumptions
-	t.curstyle = styleInvalid
-
-	t.buf.Reset()
-	t.buffering = true
-	t.startBuffering()
-	defer func() {
-		t.buffering = false
-		t.endBuffering()
-	}()
-
-	// hide the cursor while we move stuff around
-	t.hideCursor()
-
-	if t.cls {
-		t.clearScreen()
-	}
-
-	for y := 0; y < t.h; y++ {
-		for x := 0; x < t.w; x++ {
-			width := t.drawCell(x, y)
-			if width > 1 {
-				if x+1 < t.w {
-					// this is necessary so that if we ever
-					// go back to drawing that cell, we
-					// actually will *draw* it.
-					t.cells.SetDirty(x+1, y, true)
-				}
-			}
-			x += width - 1
-		}
-	}
-
-	if t.curstyle.url != nil && t.curstyle.url.url != "" {
-		t.emitUrl(urlInfo{})
-	}
-
-	// restore the cursor
-	t.showCursor()
-
-	_, _ = t.buf.WriteTo(t.tty)
+	return
 }
 
-func (t *tScreen) EnableMouse(flags ...MouseFlags) {
-	var f MouseFlags
-	flagsPresent := false
-	for _, flag := range flags {
-		f |= flag
-		flagsPresent = true
-	}
-	if !flagsPresent {
-		f = MouseMotionEvents | MouseDragEvents | MouseButtonEvents
-	}
+// make no style assumptions
 
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.mouseFlags = f
-	t.enableMouse(f)
-	t.Unlock()
-}
+// hide the cursor while we move stuff around
+
+// this is necessary so that if we ever
+// go back to drawing that cell, we
+// actually will *draw* it.
+
+// restore the cursor
+
+func (t *tScreen) EnableMouse(flags ...MouseFlags) { _ = "STUB: not implemented"; return }
 
 func (t *tScreen) enableMouse(f MouseFlags) {
+	_ = "STUB: not implemented"
 	// Rather than using terminfo to find mouse escape sequences, we rely on the fact that
 	// pretty much *every* terminal that supports mouse tracking follows the
 	// XTerm standards (the modern ones).  It is expected that all terminals understand
 	// the same DEC private modes.  Note that the SGR mode is required for the mouse sequences
 	// to be understood.
-
-	// We rely on dec private mode queries for this.
-	// If your terminal doesn't support these, then ask them to fix it.
-	// Note that as of macOS 26, macOS Terminal does not support them,
-	// so we enable the mouse unconditionally unless we get a report
-	// that says we have mouse, but not SGR mouse.  This is suboptimal, but
-	// a concession forced by the sorry state of terminal emulators.
-	if t.mouseDisabled {
-		f = 0
-	}
-	if f != 0 && t.haveMouse && !t.haveMouseSgr {
-		return
-	}
-
-	// start by disabling all tracking.
-	t.Print(vt.PmMouseButton.Disable())
-	t.Print(vt.PmMouseDrag.Disable())
-	t.Print(vt.PmMouseMotion.Disable())
-	t.Print(vt.PmMouseSgr.Disable())
-	t.Print(vt.PmMouseSgrPixel.Disable())
-
-	pixel := f&MousePixelEvents != 0
-	t.input.SetPixelMouse(pixel)
-
-	if f&(MouseButtonEvents|MouseDragEvents|MouseMotionEvents) != 0 {
-		t.Print(vt.PmMouseButton.Enable())
-	}
-	if f&MouseDragEvents != 0 {
-		t.Print(vt.PmMouseDrag.Enable())
-	}
-	if f&MouseMotionEvents != 0 {
-		t.Print(vt.PmMouseMotion.Enable())
-	}
-	if f&(MouseButtonEvents|MouseDragEvents|MouseMotionEvents) != 0 {
-		if pixel {
-			t.Print(vt.PmMouseSgrPixel.Enable())
-		} else {
-			t.Print(vt.PmMouseSgr.Enable())
-		}
-	}
+	return
 }
 
-func (t *tScreen) DisableMouse() {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.mouseFlags = 0
-	t.enableMouse(0)
-	t.Unlock()
-}
+// We rely on dec private mode queries for this.
+// If your terminal doesn't support these, then ask them to fix it.
+// Note that as of macOS 26, macOS Terminal does not support them,
+// so we enable the mouse unconditionally unless we get a report
+// that says we have mouse, but not SGR mouse.  This is suboptimal, but
+// a concession forced by the sorry state of terminal emulators.
 
-func (t *tScreen) EnablePaste() {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.pasteEnabled = true
-	t.enablePasting(true)
-	t.Unlock()
-}
+// start by disabling all tracking.
 
-func (t *tScreen) DisablePaste() {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.pasteEnabled = false
-	t.enablePasting(false)
-	t.Unlock()
-}
+func (t *tScreen) DisableMouse() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) enablePasting(on bool) {
-	var s string
-	if on {
-		s = vt.PmBracketedPaste.Enable()
-	} else {
-		s = vt.PmBracketedPaste.Disable()
-	}
-	if s != "" {
-		t.Print(s)
-	}
-}
+func (t *tScreen) EnablePaste() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) EnableFocus() {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.focusEnabled = true
-	t.enableFocusReporting()
-	t.Unlock()
-}
+func (t *tScreen) DisablePaste() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) DisableFocus() {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.focusEnabled = false
-	t.disableFocusReporting()
-	t.Unlock()
-}
+func (t *tScreen) enablePasting(on bool) { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) enableFocusReporting() {
-	t.Print(vt.PmFocusReports.Enable())
-}
+func (t *tScreen) EnableFocus() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) disableFocusReporting() {
-	t.Print(vt.PmFocusReports.Disable())
-}
+func (t *tScreen) DisableFocus() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) Size() (int, int) {
-	t.Lock()
-	w, h := t.w, t.h
-	t.Unlock()
-	return w, h
-}
+func (t *tScreen) enableFocusReporting() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) resize() {
-	ws, err := t.tty.WindowSize()
-	if err != nil {
-		return
-	}
-	if ws.Width == t.w && ws.Height == t.h {
-		return
-	}
-	t.cx = -1
-	t.cy = -1
+func (t *tScreen) disableFocusReporting() { _ = "STUB: not implemented"; return }
 
-	t.cells.Resize(ws.Width, ws.Height)
-	t.cells.Invalidate()
-	t.h = ws.Height
-	t.w = ws.Width
-	t.input.SetSize(ws.Width, ws.Height)
-}
+func (t *tScreen) Size() (int, int) { _ = "STUB: not implemented"; return 0, 0 }
+
+func (t *tScreen) resize() { _ = "STUB: not implemented"; return }
 
 func (t *tScreen) Colors() int {
+	_ = "STUB: not implemented"
 	// this doesn't change, no need for lock
-	if t.truecolor {
-		return 1 << 24
-	}
-	return t.ncolor
+	return 0
 }
 
 // vtACSNames is a map of bytes defined by terminfo that are used in
@@ -1250,500 +526,141 @@ var vtACSNames = map[byte]rune{
 // alternate character encodings.  To do this, we use the standard VT100 ACS
 // maps.  This is only done if the terminal lacks support for Unicode; we
 // always prefer to emit Unicode glyphs when we are able.
-func (t *tScreen) buildAcsMap() {
-	const acsstr = "``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~"
-
-	t.acs = make(map[rune]string)
-	for b, r := range vtACSNames {
-		t.acs[r] = startAltChars + string(b) + endAltChars
-	}
-}
+func (t *tScreen) buildAcsMap() { _ = "STUB: not implemented"; return }
 
 func (t *tScreen) scanInput(buf *bytes.Buffer) {
+	_ = "STUB: not implemented"
 	// The end of the buffer isn't necessarily the end of the input, because
 	// large inputs are chunked. Set atEOF to false so the UTF-8 validating decoder
 	// returns ErrShortSrc instead of ErrInvalidUTF8 for incomplete multi-byte codepoints.
-	const atEOF = false
-
-	for buf.Len() > 0 {
-		utf := make([]byte, min(8, max(buf.Len()*2, 128)))
-		nOut, nIn, e := t.decoder.Transform(utf, buf.Bytes(), atEOF)
-		_ = buf.Next(nIn)
-		t.input.ScanUTF8(utf[:nOut])
-		if e == transform.ErrShortSrc {
-			return
-		}
-	}
+	return
 }
 
-func (t *tScreen) mainLoop(stopQ chan struct{}) {
-	defer t.wg.Done()
-	buf := &bytes.Buffer{}
-	var ta <-chan time.Time
-	for {
-		select {
-		case <-stopQ:
-			return
-		case <-t.quit:
-			return
-		case <-t.resizeQ:
-			go func() {
-				t.Lock()
-				t.cx = -1
-				t.cy = -1
-				t.resize()
-				t.cells.Invalidate()
-				t.draw()
-				t.Unlock()
-			}()
-			continue
-		case chunk := <-t.keyQ:
-			buf.Write(chunk)
-			t.scanInput(buf)
-			if t.input.Waiting() {
-				ta = time.After(time.Millisecond * 100)
-			} else {
-				ta = nil
-			}
-		case <-ta:
-			t.input.Scan()
-		}
-	}
-}
+func (t *tScreen) mainLoop(stopQ chan struct{}) { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) inputLoop(stopQ chan struct{}) {
+func (t *tScreen) inputLoop(stopQ chan struct{}) { _ = "STUB: not implemented"; return }
 
-	defer t.wg.Done()
-	for {
-		select {
-		case <-stopQ:
-			return
-		default:
-		}
-		chunk := make([]byte, 128)
-		n, e := t.tty.Read(chunk)
-		switch e {
-		case nil:
-		default:
-			t.Lock()
-			running := t.running
-			t.Unlock()
-			if running {
-				select {
-				case t.eventQ <- NewEventError(e):
-				case <-t.quit:
-				}
-			}
-			return
-		}
-		if n > 0 {
-			t.keyQ <- chunk[:n]
-		}
-	}
-}
+func (t *tScreen) Sync() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) Sync() {
-	t.Lock()
-	t.cx = -1
-	t.cy = -1
-	if !t.fini {
-		t.resize()
-		t.cls = true
-		t.cells.Invalidate()
-		t.draw()
-	}
-	t.Unlock()
-}
-
-func (t *tScreen) CharacterSet() string {
-	return t.charset
-}
+func (t *tScreen) CharacterSet() string { _ = "STUB: not implemented"; return "" }
 
 func (t *tScreen) RegisterRuneFallback(orig rune, fallback string) {
-	t.Lock()
-	t.fallback[orig] = fallback
-	t.Unlock()
+	_ = "STUB: not implemented"
+	return
 }
 
-func (t *tScreen) UnregisterRuneFallback(orig rune) {
-	t.Lock()
-	delete(t.fallback, orig)
-	t.Unlock()
-}
+func (t *tScreen) UnregisterRuneFallback(orig rune) { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) SetSize(w, h int) {
-	t.Lock()
-	defer t.Unlock()
-	if t.fini {
-		return
-	}
-	if t.setWinSize != "" {
-		t.Printf(t.setWinSize, w, h)
-	}
-	t.cells.Invalidate()
-	t.resize()
-}
+func (t *tScreen) SetSize(w, h int) { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) Resize(int, int, int, int) {}
+func (t *tScreen) Resize(int, int, int, int) { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) Suspend() error {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return nil
-	}
-	finish := t.disengageStart()
-	t.Unlock()
-	if finish {
-		t.disengageFinish()
-	}
-	return nil
-}
+func (t *tScreen) Suspend() error { _ = "STUB: not implemented"; return nil }
 
-func (t *tScreen) Resume() error {
-	t.Lock()
-	defer t.Unlock()
-	if t.fini {
-		return nil
-	}
-	return t.engageLocked()
-}
+func (t *tScreen) Resume() error { _ = "STUB: not implemented"; return nil }
 
-func (t *tScreen) Tty() (Tty, bool) {
-	return t.tty, true
-}
+func (t *tScreen) Tty() (Tty, bool) { _ = "STUB: not implemented"; return *new(Tty), false }
 
 func (t *tScreen) applyKnownTerminalProfile(goos, termProgram string) bool {
-	switch termProgram {
-	case "Apple_Terminal":
-		// macOS Terminal.app cannot handle the startup queries, but it does
-		// support modern mouse reporting.
-		t.haveMouse = true
-		t.haveMouseSgr = true
-		t.termName = "Terminal.app"
-		t.termVers = os.Getenv("TERM_PROGRAM_VERSION")
-		return true
-	case "WezTerm":
-		// The WezTerm keyboard protocol to use is in theory driven by its
-		// own configuration, but we have found this unreliable because it
-		// does not mask unsupported capabilities.  Furthermore, on Windows
-		// builds the kitty protocol implementation is broken, while on other
-		// builds win32-input-mode is broken.  This is a best effort to make
-		// WezTerm work reasonably; our stronger advice is to choose another
-		// terminal program altogether.  This workaround will probably not
-		// apply to ssh sessions, as TERM_PROGRAM is not normally propagated.
-		if goos == "windows" {
-			t.haveWin32Kbd = true
-		} else {
-			t.haveKittyKbd = true
-			t.haveWin32Kbd = false
-		}
-		t.haveMouse = true
-		t.haveMouseSgr = true
-		t.initted = true
-		t.termName = "WezTerm"
-		t.termVers = os.Getenv("TERM_PROGRAM_VERSION")
-		return true
-	}
+	_ = "STUB: not implemented"
 	return false
 }
 
-func useVTWindowSizeQuery(goos string) bool {
-	return goos != "windows"
-}
+// macOS Terminal.app cannot handle the startup queries, but it does
+// support modern mouse reporting.
 
-func useXTermKeyboardQuery(goos string) bool {
-	return goos != "windows"
-}
+// The WezTerm keyboard protocol to use is in theory driven by its
+// own configuration, but we have found this unreliable because it
+// does not mask unsupported capabilities.  Furthermore, on Windows
+// builds the kitty protocol implementation is broken, while on other
+// builds win32-input-mode is broken.  This is a best effort to make
+// WezTerm work reasonably; our stronger advice is to choose another
+// terminal program altogether.  This workaround will probably not
+// apply to ssh sessions, as TERM_PROGRAM is not normally propagated.
+
+func useVTWindowSizeQuery(goos string) bool { _ = "STUB: not implemented"; return false }
+
+func useXTermKeyboardQuery(goos string) bool { _ = "STUB: not implemented"; return false }
 
 // engage is used to place the terminal in raw mode and establish screen size, etc.
 // Think of this is as tcell "engaging" the clutch, as it's going to be driving the
 // terminal interface.
-func (t *tScreen) engage() error {
-	t.Lock()
-	defer t.Unlock()
-	return t.engageLocked()
-}
+func (t *tScreen) engage() error { _ = "STUB: not implemented"; return nil }
 
 // engageLocked is engage's implementation when t's lock is already held.
-func (t *tScreen) engageLocked() error {
-	if t.tty == nil {
-		return ErrNoScreen
-	}
-	if t.running {
-		return errors.New("already engaged")
-	}
-	if err := t.tty.Start(); err != nil {
-		return err
-	}
+func (t *tScreen) engageLocked() error { _ = "STUB: not implemented"; return nil }
 
-	stopQ := make(chan struct{})
-	t.stopQ = stopQ
-	t.wg.Add(2)
-	go t.inputLoop(stopQ)
-	go t.mainLoop(stopQ)
+// macOS Terminal.app is brain damaged
+// https://garrett.damore.org/2025/12/macos-terminal-still-missing-mark-apple.html
+// Eventually they'll hopefully fix this.  As the environment variable
+// does not convey by default via ssh, remote sessions might see spurious characters
+// emitted during startup.  See the blog post for alternatives.
 
-	if !t.initted {
-		// macOS Terminal.app is brain damaged
-		// https://garrett.damore.org/2025/12/macos-terminal-still-missing-mark-apple.html
-		// Eventually they'll hopefully fix this.  As the environment variable
-		// does not convey by default via ssh, remote sessions might see spurious characters
-		// emitted during startup.  See the blog post for alternatives.
-		if !t.applyKnownTerminalProfile(runtime.GOOS, os.Getenv("TERM_PROGRAM")) && t.negotiate {
-			if useVTWindowSizeQuery(runtime.GOOS) {
-				t.Print(requestWindowSize)
-			}
-			t.Print(vt.PmResizeReports.Query())
-			t.Print(vt.PmMouseButton.Query())
-			t.Print(vt.PmMouseSgr.Query())
-			if !t.forceKbd {
-				t.Print(vt.PmWin32Input.Query())
-				t.Print(queryKittyKbd)
-				if useXTermKeyboardQuery(runtime.GOOS) {
-					// XTerm's modifyOtherKeys mode is mainly useful for XTerm
-					// itself, and we do not use it on Windows.
-					t.Print(queryXTermKbd)
-				}
-			}
-			t.Print(requestExtAttr)
-		}
-		if !t.negotiate {
-			t.initted = true
-		} else if !t.initted {
-			t.Print(requestPrimaryDA) // NB: MUST BE LAST
-		}
-	}
-	t.processInitQ()
-	t.applyKeyboardProtocolOverride()
-	if t.useAltScreen() {
-		// Technically this may not be right, but every terminal we know about
-		// (even Wyse 60) uses this to enter the alternate screen buffer, and
-		// possibly save and restore the window title and/or icon.
-		// (In theory there could be terminals that don't support X,Y cursor
-		// positions without a setup command, but we don't support them.)
-		t.Print(enterCA)
-		t.Print(t.saveTitle)
-	}
-	if t.haveWin32Kbd {
-		t.Print(vt.PmWin32Input.Enable())
-	} else if t.haveKittyKbd {
-		if t.advancedKeys {
-			t.Print(enableKittyKbdAdv)
-		} else {
-			t.Print(enableKittyKbd)
-		}
-	} else if t.haveXTermKbd {
-		t.Print(enableXTermKbd)
-	}
+// XTerm's modifyOtherKeys mode is mainly useful for XTerm
+// itself, and we do not use it on Windows.
 
-	t.running = true
-	if ws, err := t.tty.WindowSize(); err == nil && ws.Width != 0 && ws.Height != 0 {
-		t.cells.Resize(ws.Width, ws.Height)
-	}
-	t.enableMouse(t.mouseFlags)
-	t.enablePasting(t.pasteEnabled)
-	if t.focusEnabled {
-		t.enableFocusReporting()
-	}
-	t.Print(enterKeypad)
-	t.Print(enableAltChars)
-	t.Print(vt.PmShowCursor.Disable())
-	t.Print(vt.PmAutoMargin.Disable())
-	t.Print(clear)
-	if t.title != "" && t.setTitle != "" {
-		t.Printf(t.setTitle, t.title)
-	}
-	if t.negotiate && useVTWindowSizeQuery(runtime.GOOS) {
-		t.Print(requestWindowSize)
-	}
+// NB: MUST BE LAST
 
-	if t.inlineResize {
-		t.Print(vt.PmResizeReports.Enable())
-	} else {
-		t.tty.NotifyResize(t.resizeQ)
-	}
-	return nil
-}
+// Technically this may not be right, but every terminal we know about
+// (even Wyse 60) uses this to enter the alternate screen buffer, and
+// possibly save and restore the window title and/or icon.
+// (In theory there could be terminals that don't support X,Y cursor
+// positions without a setup command, but we don't support them.)
 
 // disengage is used to release the terminal back to support from the caller.
 // Think of this as tcell disengaging the clutch, so that another application
 // can take over the terminal interface.  This restores the TTY mode that was
 // present when the application was first started.
-func (t *tScreen) disengage() {
-	t.Lock()
-	finish := t.disengageStart()
-	t.Unlock()
-	if finish {
-		t.disengageFinish()
-	}
-}
+func (t *tScreen) disengage() { _ = "STUB: not implemented"; return }
 
 // disengageStart begins a disengage operation while t's lock is already held.
 // It returns true when disengageFinish must be called after releasing the lock.
-func (t *tScreen) disengageStart() bool {
-	if !t.running {
-		return false
-	}
-
-	t.running = false
-	if t.inlineResize {
-		t.Print(vt.PmResizeReports.Disable())
-	} else {
-		t.tty.NotifyResize(nil)
-	}
-	stopQ := t.stopQ
-	close(stopQ)
-	_ = t.tty.Drain()
-	return true
-}
+func (t *tScreen) disengageStart() bool { _ = "STUB: not implemented"; return false }
 
 // disengageFinish completes a disengage operation after disengageStart has
 // released the running loops.
 func (t *tScreen) disengageFinish() {
+	_ = "STUB: not implemented"
 	// wait for everything to shut down
-	t.wg.Wait()
-
-	// shutdown the screen and disable special modes (e.g. mouse and bracketed paste)
-	t.cells.Resize(0, 0)
-	t.Print(vt.PmShowCursor.Enable())
-	if t.cursorStyles != nil && t.cursorStyle != CursorStyleDefault {
-		t.Print(t.cursorStyles[CursorStyleDefault])
-	}
-	if t.cursorFg != "" && t.cursorColor.Valid() {
-		t.Print(t.cursorFg)
-	}
-	t.Print(exitKeypad)
-	t.Print(sgr0)
-	t.Print(vt.PmAutoMargin.Enable())
-	if t.haveWin32Kbd {
-		t.Print(vt.PmWin32Input.Disable())
-	}
-	if t.haveKittyKbd {
-		t.Print(disableKittyKbd)
-	}
-	if t.haveXTermKbd {
-		t.Print(disableXTermKbd)
-	}
-
-	// Hack for Windows.
-	if runtime.GOOS == "windows" {
-		t.Print(vt.PmWin32Input.Disable())
-	}
-
-	// t.Print(t.disableCsiU)
-	if t.useAltScreen() {
-		t.Print(t.restoreTitle)
-		t.Print(clear)
-		t.Print(exitCA)
-	}
-	t.enableMouse(0)
-	t.enablePasting(false)
-	t.disableFocusReporting()
-
-	_ = t.tty.Stop()
+	return
 }
+
+// shutdown the screen and disable special modes (e.g. mouse and bracketed paste)
+
+// Hack for Windows.
+
+// t.Print(t.disableCsiU)
 
 // Beep emits a beep to the terminal.
-func (t *tScreen) Beep() error {
-	t.Lock()
-	defer t.Unlock()
-	if t.fini {
-		return nil
-	}
-	t.Print(string(byte(7)))
-	return nil
-}
+func (t *tScreen) Beep() error { _ = "STUB: not implemented"; return nil }
 
 // finalize is used to at application shutdown, and restores the terminal
 // to it's initial state.  It should not be called more than once.
-func (t *tScreen) finalize() {
-	t.disengage()
-	_ = t.tty.Close()
-	close(t.eventQ)
-}
+func (t *tScreen) finalize() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) StopQ() <-chan struct{} {
-	return t.quit
-}
+func (t *tScreen) StopQ() <-chan struct{} { _ = "STUB: not implemented"; return nil }
 
-func (t *tScreen) EventQ() chan Event {
-	return t.eventQ
-}
+func (t *tScreen) EventQ() chan Event { _ = "STUB: not implemented"; return nil }
 
-func (t *tScreen) GetCells() *CellBuffer {
-	return &t.cells
-}
+func (t *tScreen) GetCells() *CellBuffer { _ = "STUB: not implemented"; return nil }
 
-func (t *tScreen) SetTitle(title string) {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.title = stripOSCControlsIfNeeded(title)
-	if t.setTitle != "" && t.running {
-		t.Printf(t.setTitle, t.title)
-	}
-	t.Unlock()
-}
+func (t *tScreen) SetTitle(title string) { _ = "STUB: not implemented"; return }
 
 func (t *tScreen) SetClipboard(data []byte) {
+	_ = "STUB: not implemented"
 	// Post binary data to the system clipboard.  It might be UTF-8, it might not be.
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	if t.setClipboard != "" {
-		encoded := base64.StdEncoding.EncodeToString(data)
-		t.Printf(t.setClipboard, encoded)
-	}
-	t.Unlock()
+	return
 }
 
-func (t *tScreen) GetClipboard() {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	if t.setClipboard != "" {
-		t.Printf(t.setClipboard, "?")
-	}
-	t.Unlock()
-}
+func (t *tScreen) GetClipboard() { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) HasClipboard() bool {
-	return t.hasClipboard
-}
+func (t *tScreen) HasClipboard() bool { _ = "STUB: not implemented"; return false }
 
-func (t *tScreen) ShowNotification(title string, body string) {
-	t.Lock()
-	if t.fini {
-		t.Unlock()
-		return
-	}
-	t.Printf(t.notifyDesktop, stripOSCControlsIfNeeded(title), stripOSCControlsIfNeeded(body))
-	t.Unlock()
-}
+func (t *tScreen) ShowNotification(title string, body string) { _ = "STUB: not implemented"; return }
 
-func (t *tScreen) Terminal() (string, string) {
-	t.Lock()
-	defer t.Unlock()
-	return t.termName, t.termVers
-}
+func (t *tScreen) Terminal() (string, string) { _ = "STUB: not implemented"; return "", "" }
 
 func (t *tScreen) KeyboardProtocol() KeyProtocol {
-	t.Lock()
-	defer t.Unlock()
-	if t.haveWin32Kbd {
-		return Win32Keyboard
-	}
-	if t.haveKittyKbd {
-		return KittyKeyboard
-	}
-	if t.haveXTermKbd {
-		return XTermKeyboard
-	}
-	return LegacyKeyboard
+	_ = "STUB: not implemented"
+	return *new(KeyProtocol)
 }

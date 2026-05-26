@@ -18,7 +18,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"time"
 
@@ -26,38 +25,7 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
-func makeBox(s tcell.Screen) {
-	w, h := s.Size()
-
-	if w == 0 || h == 0 {
-		return
-	}
-
-	glyphs := []string{"@", "#", "&", "*", "=", "%", "Z", "A"}
-
-	lx := rand.Int() % w
-	ly := rand.Int() % h
-	lw := rand.Int() % (w - lx)
-	lh := rand.Int() % (h - ly)
-	st := tcell.StyleDefault
-	gl := " "
-	if s.Colors() > 256 {
-		rgb := tcell.NewHexColor(int32(rand.Int() & 0xffffff))
-		st = st.Background(rgb)
-	} else if s.Colors() > 1 {
-		st = st.Background(color.Color(rand.Int()%s.Colors()) | color.IsValid)
-	} else {
-		st = st.Reverse(rand.Int()%2 == 0)
-		gl = glyphs[rand.Int()%len(glyphs)]
-	}
-
-	for row := range lh {
-		for col := range lw {
-			s.PutStrStyled(lx+col, ly+row, gl, st)
-		}
-	}
-	s.Show()
-}
+func makeBox(s tcell.Screen) { _ = "STUB: not implemented"; return }
 
 var (
 	count    = 0

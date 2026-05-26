@@ -24,23 +24,13 @@ type cell struct {
 }
 
 func (c *cell) setDirty(dirty bool) {
-	if dirty {
-		// Empty cells use currStr == "" until they are first drawn, at which
-		// point SetDirty(false) normalizes them to a space.  Using "" as the
-		// dirty marker for an untouched empty cell would therefore leave
-		// lastStr == currStr and fail to force a redraw.
-		if c.currStr == "" {
-			c.lastStr = " "
-		} else {
-			c.lastStr = ""
-		}
-	} else {
-		if c.currStr == "" {
-			c.currStr = " "
-		}
-		c.lastStr = c.currStr
-		c.lastStyle = c.currStyle
-	}
+	_ = "STUB: not implemented"
+
+	// Empty cells use currStr == "" until they are first drawn, at which
+	// point SetDirty(false) normalizes them to a space.  Using "" as the
+	// dirty marker for an untouched empty cell would therefore leave
+	// lastStr == currStr and fail to force a redraw.
+	return
 }
 
 // CellBuffer represents a two-dimensional array of character cells.
@@ -61,188 +51,73 @@ type CellBuffer struct {
 // will be displayed, using only the 1 or 2 (depending on width) cells
 // located at x, y. It returns the rest of the string, and the width used.
 func (cb *CellBuffer) Put(x int, y int, str string, style Style) (string, int) {
-	if cb.sanitizeContent {
-		str = stripOSCControlsIfNeeded(str)
-	}
-	return cb.put(x, y, str, style)
+	_ = "STUB: not implemented"
+	return "", 0
 }
 
 func (cb *CellBuffer) put(x int, y int, str string, style Style) (string, int) {
-	var width int = 0
-	if x >= 0 && y >= 0 && x < cb.w && y < cb.h {
-		var cl string
-		c := &cb.cells[(y*cb.w)+x]
-		if str == c.currStr && c.width > 0 {
-			// Identical re-Put (a full-screen redraw): the grapheme split is
-			// unchanged, so reuse the measured width instead of segmenting.
-			cl, width, str = str, c.width, ""
-		} else {
-			g := textWidthOptions.StringGraphemes(str)
-			for width == 0 && g.Next() {
-				cluster := g.Value()
-				cl += cluster
-				width = g.Width()
-				str = str[len(cluster):]
-			}
-		}
-
-		// Wide characters: we want to mark the "wide" cells
-		// dirty as well as the base cell, to make sure we consider
-		// both cells as dirty together.  We only need to do this
-		// if we're changing content
-		if width > 1 && cl != c.currStr {
-			// Prevent unnecessary bounds checks for first cell, since we already
-			// received that one.
-			c.setDirty(true)
-			for i := 1; i < width; i++ {
-				cb.SetDirty(x+i, y, true)
-			}
-		}
-
-		c.currStr = cl
-		c.width = width
-
-		if style.fg == ColorNone {
-			style.fg = c.currStyle.fg
-		}
-		if style.bg == ColorNone {
-			style.bg = c.currStyle.bg
-		}
-		c.currStyle = style
-	}
-	return str, width
+	_ = "STUB: not implemented"
+	return "", 0
 }
+
+// Identical re-Put (a full-screen redraw): the grapheme split is
+// unchanged, so reuse the measured width instead of segmenting.
+
+// Wide characters: we want to mark the "wide" cells
+// dirty as well as the base cell, to make sure we consider
+// both cells as dirty together.  We only need to do this
+// if we're changing content
+
+// Prevent unnecessary bounds checks for first cell, since we already
+// received that one.
 
 // Get the contents of a character cell (or two adjacent cells), including the
 // the style and the display width in cells.  (The width can be either 1, normally,
 // or 2 for East Asian full-width characters.  If the width is 0, then the cell is
 // is empty.)
 func (cb *CellBuffer) Get(x, y int) (string, Style, int) {
-	var style Style
-	var width int
-	var str string
-	if x >= 0 && y >= 0 && x < cb.w && y < cb.h {
-		c := &cb.cells[(y*cb.w)+x]
-		str, style = c.currStr, c.currStyle
-		if width = c.width; width == 0 || str == "" {
-			width = 1
-			str = " "
-		}
-	}
-	return str, style, width
+	_ = "STUB: not implemented"
+	return "", *new(Style), 0
 }
 
 // Size returns the (width, height) in cells of the buffer.
 func (cb *CellBuffer) Size() (int, int) {
-	return cb.w, cb.h
+	_ = "STUB: not implemented"
+
+	// Invalidate marks all characters within the buffer as dirty.
+	return 0, 0
 }
 
-// Invalidate marks all characters within the buffer as dirty.
-func (cb *CellBuffer) Invalidate() {
-	for i := range cb.cells {
-		cb.cells[i].setDirty(true)
-	}
-}
+func (cb *CellBuffer) Invalidate() { _ = "STUB: not implemented"; return }
 
 // Dirty checks if a character at the given location needs to be
 // refreshed on the physical display.  This returns true if the cell
 // content is different since the last time it was marked clean.
-func (cb *CellBuffer) Dirty(x, y int) bool {
-	if x >= 0 && y >= 0 && x < cb.w && y < cb.h {
-		c := &cb.cells[(y*cb.w)+x]
-		if c.lock {
-			return false
-		}
-		if c.lastStyle != c.currStyle {
-			return true
-		}
-		if c.lastStr != c.currStr {
-			return true
-		}
-	}
-	return false
-}
+func (cb *CellBuffer) Dirty(x, y int) bool { _ = "STUB: not implemented"; return false }
 
 // SetDirty is normally used to indicate that a cell has
 // been displayed (in which case dirty is false), or to manually
 // force a cell to be marked dirty.
-func (cb *CellBuffer) SetDirty(x, y int, dirty bool) {
-	if x >= 0 && y >= 0 && x < cb.w && y < cb.h {
-		c := &cb.cells[(y*cb.w)+x]
-		c.setDirty(dirty)
-	}
-}
+func (cb *CellBuffer) SetDirty(x, y int, dirty bool) { _ = "STUB: not implemented"; return }
 
 // LockCell locks a cell from being drawn, effectively marking it "clean" until
 // the lock is removed. This can be used to prevent tcell from drawing a given
 // cell, even if the underlying content has changed. For example, when drawing a
 // sixel graphic directly to a TTY screen an implementer must lock the region
 // underneath the graphic to prevent tcell from drawing on top of the graphic.
-func (cb *CellBuffer) LockCell(x, y int) {
-	if x < 0 || y < 0 {
-		return
-	}
-	if x >= cb.w || y >= cb.h {
-		return
-	}
-	c := &cb.cells[(y*cb.w)+x]
-	c.lock = true
-}
+func (cb *CellBuffer) LockCell(x, y int) { _ = "STUB: not implemented"; return }
 
 // UnlockCell removes a lock from the cell and marks it as dirty
-func (cb *CellBuffer) UnlockCell(x, y int) {
-	if x < 0 || y < 0 {
-		return
-	}
-	if x >= cb.w || y >= cb.h {
-		return
-	}
-	c := &cb.cells[(y*cb.w)+x]
-	c.lock = false
-	cb.SetDirty(x, y, true)
-}
+func (cb *CellBuffer) UnlockCell(x, y int) { _ = "STUB: not implemented"; return }
 
 // Resize is used to resize the cells array, with different dimensions,
 // while preserving the original contents.  The cells will be invalidated
 // so that they can be redrawn.
-func (cb *CellBuffer) Resize(w, h int) {
-	if cb.h == h && cb.w == w {
-		return
-	}
-
-	newc := make([]cell, w*h)
-	for y := 0; y < h && y < cb.h; y++ {
-		for x := 0; x < w && x < cb.w; x++ {
-			oc := &cb.cells[(y*cb.w)+x]
-			nc := &newc[(y*w)+x]
-			nc.currStr = oc.currStr
-			nc.currStyle = oc.currStyle
-			nc.width = oc.width
-			nc.lastStr = ""
-		}
-	}
-	cb.cells = newc
-	cb.h = h
-	cb.w = w
-}
+func (cb *CellBuffer) Resize(w, h int) { _ = "STUB: not implemented"; return }
 
 // Fill fills the entire cell buffer array with the specified character
 // and style.  Normally choose ' ' to clear the screen.  This API doesn't
 // support combining characters, or characters with a width larger than one.
 // If either the foreground or background are ColorNone, then the respective
 // color is unchanged.
-func (cb *CellBuffer) Fill(r rune, style Style) {
-	for i := range cb.cells {
-		c := &cb.cells[i]
-		c.currStr = string(r)
-		cs := style
-		if cs.fg == ColorNone {
-			cs.fg = c.currStyle.fg
-		}
-		if cs.bg == ColorNone {
-			cs.bg = c.currStyle.bg
-		}
-		c.currStyle = cs
-		c.width = 1
-	}
-}
+func (cb *CellBuffer) Fill(r rune, style Style) { _ = "STUB: not implemented"; return }

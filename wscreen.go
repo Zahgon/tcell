@@ -18,8 +18,6 @@
 package tcell
 
 import (
-	"errors"
-	"io"
 	"sync"
 	"syscall/js"
 
@@ -27,19 +25,9 @@ import (
 )
 
 // initialize installs the browser-backed TTY used by tScreen on js/wasm.
-func (t *tScreen) initialize() error {
-	if t.tty == nil {
-		t.tty = newBrowserTty()
-	}
-	if t.term == "" {
-		t.term = "ghostty-truecolor"
-	}
-	return nil
-}
+func (t *tScreen) initialize() error { _ = "STUB: not implemented"; return nil }
 
-func getCharset() string {
-	return "UTF-8"
-}
+func getCharset() string { _ = "STUB: not implemented"; return "" }
 
 type browserTty struct {
 	mu      sync.Mutex
@@ -55,170 +43,25 @@ type browserTty struct {
 	closeFuncs []js.Func
 }
 
-func newBrowserTty() *browserTty {
-	t := &browserTty{}
-	t.cond = sync.NewCond(&t.mu)
-	return t
-}
+func newBrowserTty() *browserTty { _ = "STUB: not implemented"; return nil }
 
-func (t *browserTty) Start() error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+func (t *browserTty) Start() error { _ = "STUB: not implemented"; return nil }
 
-	if t.started {
-		return nil
-	}
-	global := js.Global()
-	t.writeFunc = global.Get("tcellWrite")
-	t.sizeFunc = global.Get("tcellWindowSize")
-	if t.writeFunc.Type() != js.TypeFunction || t.sizeFunc.Type() != js.TypeFunction {
-		return errors.New("tcell wasm terminal host is not installed")
-	}
+func (t *browserTty) Stop() error { _ = "STUB: not implemented"; return nil }
 
-	onData := js.FuncOf(func(this js.Value, args []js.Value) any {
-		if len(args) == 0 {
-			return nil
-		}
-		if args[0].InstanceOf(global.Get("Uint8Array")) {
-			data := make([]byte, args[0].Get("byteLength").Int())
-			js.CopyBytesToGo(data, args[0])
-			t.enqueue(data)
-		} else {
-			t.enqueue([]byte(args[0].String()))
-		}
-		return nil
-	})
-	onResize := js.FuncOf(func(this js.Value, args []js.Value) any {
-		t.mu.Lock()
-		resizeQ := t.resizeQ
-		t.mu.Unlock()
-		if resizeQ != nil {
-			select {
-			case resizeQ <- true:
-			default:
-			}
-		}
-		return nil
-	})
-	t.closeFuncs = []js.Func{onData, onResize}
-	global.Set("tcellRead", onData)
-	global.Set("tcellResize", onResize)
+func (t *browserTty) Drain() error { _ = "STUB: not implemented"; return nil }
 
-	t.started = true
-	t.drained = false
-	t.closed = false
-	return nil
-}
-
-func (t *browserTty) Stop() error {
-	t.mu.Lock()
-	t.started = false
-	t.drained = false
-	funcs := t.closeFuncs
-	t.closeFuncs = nil
-	t.cond.Broadcast()
-	t.mu.Unlock()
-
-	js.Global().Set("tcellRead", js.Undefined())
-	js.Global().Set("tcellResize", js.Undefined())
-	for _, fn := range funcs {
-		fn.Release()
-	}
-	return nil
-}
-
-func (t *browserTty) Drain() error {
-	t.mu.Lock()
-	t.input = nil
-	t.drained = true
-	t.cond.Broadcast()
-	t.mu.Unlock()
-	return nil
-}
-
-func (t *browserTty) NotifyResize(resizeQ chan<- bool) {
-	t.mu.Lock()
-	t.resizeQ = resizeQ
-	t.mu.Unlock()
-}
+func (t *browserTty) NotifyResize(resizeQ chan<- bool) { _ = "STUB: not implemented"; return }
 
 func (t *browserTty) WindowSize() (tty.WindowSize, error) {
-	var ws tty.WindowSize
-	t.mu.Lock()
-	sizeFunc := t.sizeFunc
-	t.mu.Unlock()
-	if sizeFunc.Type() != js.TypeFunction {
-		ws.Width = 80
-		ws.Height = 24
-		return ws, nil
-	}
-	size := sizeFunc.Invoke()
-	ws.Width = size.Get("cols").Int()
-	ws.Height = size.Get("rows").Int()
-	ws.PixelWidth = size.Get("pixelWidth").Int()
-	ws.PixelHeight = size.Get("pixelHeight").Int()
-	if ws.Width == 0 {
-		ws.Width = 80
-	}
-	if ws.Height == 0 {
-		ws.Height = 24
-	}
-	return ws, nil
+	_ = "STUB: not implemented"
+	return *new(tty.WindowSize), nil
 }
 
-func (t *browserTty) Read(b []byte) (int, error) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+func (t *browserTty) Read(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-	for len(t.input) == 0 && t.started && !t.drained && !t.closed {
-		t.cond.Wait()
-	}
-	if t.closed {
-		return 0, io.EOF
-	}
-	if (!t.started || t.drained) && len(t.input) == 0 {
-		return 0, io.EOF
-	}
-	n := copy(b, t.input)
-	t.input = t.input[n:]
-	return n, nil
-}
+func (t *browserTty) Write(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-func (t *browserTty) Write(b []byte) (int, error) {
-	t.mu.Lock()
-	writeFunc := t.writeFunc
-	started := t.started
-	t.mu.Unlock()
-	if !started || writeFunc.Type() != js.TypeFunction {
-		return 0, io.ErrClosedPipe
-	}
+func (t *browserTty) Close() error { _ = "STUB: not implemented"; return nil }
 
-	data := js.Global().Get("Uint8Array").New(len(b))
-	js.CopyBytesToJS(data, b)
-	writeFunc.Invoke(data)
-	return len(b), nil
-}
-
-func (t *browserTty) Close() error {
-	t.mu.Lock()
-	if t.closed {
-		t.mu.Unlock()
-		return nil
-	}
-	t.closed = true
-	t.started = false
-	t.drained = false
-	t.cond.Broadcast()
-	t.mu.Unlock()
-
-	return t.Stop()
-}
-
-func (t *browserTty) enqueue(data []byte) {
-	t.mu.Lock()
-	if t.started && !t.closed {
-		t.input = append(t.input, data...)
-		t.cond.Broadcast()
-	}
-	t.mu.Unlock()
-}
+func (t *browserTty) enqueue(data []byte) { _ = "STUB: not implemented"; return }

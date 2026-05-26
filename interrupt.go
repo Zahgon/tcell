@@ -23,12 +23,10 @@ type EventInterrupt struct {
 
 // Data is used to obtain the opaque event payload.
 func (ev *EventInterrupt) Data() any {
-	return ev.v
+	_ = "STUB: not implemented"
+
+	// NewEventInterrupt creates an EventInterrupt with the given payload.
+	return *new(any)
 }
 
-// NewEventInterrupt creates an EventInterrupt with the given payload.
-func NewEventInterrupt(data any) *EventInterrupt {
-	ev := &EventInterrupt{v: data}
-	ev.SetEventNow()
-	return ev
-}
+func NewEventInterrupt(data any) *EventInterrupt { _ = "STUB: not implemented"; return nil }

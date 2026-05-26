@@ -18,15 +18,8 @@
 package tty
 
 import (
-	"errors"
-	"fmt"
 	"os"
-	"os/signal"
-	"strconv"
-	"syscall"
-	"time"
 
-	"golang.org/x/sys/unix"
 	"golang.org/x/term"
 )
 
@@ -40,138 +33,32 @@ type stdIoTty struct {
 	started bool
 }
 
-func (tty *stdIoTty) Read(b []byte) (int, error) {
-	return tty.in.Read(b)
-}
+func (tty *stdIoTty) Read(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-func (tty *stdIoTty) Write(b []byte) (int, error) {
-	return tty.out.Write(b)
-}
+func (tty *stdIoTty) Write(b []byte) (int, error) { _ = "STUB: not implemented"; return 0, nil }
 
-func (tty *stdIoTty) Close() error {
-	return nil
-}
+func (tty *stdIoTty) Close() error { _ = "STUB: not implemented"; return nil }
 
-func (tty *stdIoTty) Start() error {
-	if tty.started {
-		return nil
-	}
+func (tty *stdIoTty) Start() error { _ = "STUB: not implemented"; return nil }
 
-	var err error
-	tty.in = os.Stdin
-	tty.out = os.Stdout
-	tty.fd = int(tty.in.Fd())
+// also sets vMin and vTime
 
-	if !term.IsTerminal(tty.fd) {
-		return errors.New("device is not a terminal")
-	}
+func (tty *stdIoTty) Drain() error { _ = "STUB: not implemented"; return nil }
 
-	_ = tty.in.SetReadDeadline(time.Time{})
-	saved, err := term.MakeRaw(tty.fd) // also sets vMin and vTime
-	if err != nil {
-		return err
-	}
-	if err = tcFlushInput(tty.fd); err != nil {
-		_ = term.Restore(tty.fd, saved)
-		return err
-	}
-	tty.saved = saved
-	tty.started = true
-
-	return nil
-}
-
-func (tty *stdIoTty) Drain() error {
-	_ = tty.in.SetReadDeadline(time.Now())
-	if err := tcSetBufParams(tty.fd, 0, 0); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (tty *stdIoTty) Stop() error {
-	if err := term.Restore(tty.fd, tty.saved); err != nil {
-		return err
-	}
-	_ = tty.in.SetReadDeadline(time.Now())
-
-	tty.NotifyResize(nil)
-
-	tty.started = false
-
-	return nil
-}
+func (tty *stdIoTty) Stop() error { _ = "STUB: not implemented"; return nil }
 
 func (tty *stdIoTty) WindowSize() (WindowSize, error) {
-	size := WindowSize{}
-	ws, err := unix.IoctlGetWinsize(tty.fd, unix.TIOCGWINSZ)
-	if err != nil {
-		return size, err
-	}
-	w := int(ws.Col)
-	h := int(ws.Row)
-	if w == 0 {
-		w, _ = strconv.Atoi(os.Getenv("COLUMNS"))
-	}
-	if w == 0 {
-		w = 80 // default
-	}
-	if h == 0 {
-		h, _ = strconv.Atoi(os.Getenv("LINES"))
-	}
-	if h == 0 {
-		h = 25 // default
-	}
-	size.Width = w
-	size.Height = h
-	size.PixelWidth = int(ws.Xpixel)
-	size.PixelHeight = int(ws.Ypixel)
-	return size, nil
+	_ = "STUB: not implemented"
+	return *new(WindowSize), nil
 }
 
-func (tty *stdIoTty) NotifyResize(resizeQ chan<- bool) {
+// default
 
-	sigQ := tty.sig
-	tty.sig = nil
+// default
 
-	if sigQ != nil {
-		signal.Stop(sigQ)
-		close(sigQ)
-	}
+func (tty *stdIoTty) NotifyResize(resizeQ chan<- bool) { _ = "STUB: not implemented"; return }
 
-	if resizeQ == nil {
-		return
-	}
-
-	sigQ = make(chan os.Signal, 1)
-	signal.Notify(sigQ, syscall.SIGWINCH)
-
-	tty.sig = sigQ
-
-	go func() {
-		for range sigQ {
-			select {
-			case resizeQ <- true:
-			default: // queue full, so nvm.
-			}
-		}
-	}()
-}
+// queue full, so nvm.
 
 // NewStdioTty opens a tty using standard input/output.
-func NewStdIoTty() (Tty, error) {
-	tty := &stdIoTty{
-		sig: make(chan os.Signal),
-		in:  os.Stdin,
-		out: os.Stdout,
-	}
-	var err error
-	tty.fd = int(tty.in.Fd())
-	if !term.IsTerminal(tty.fd) {
-		return nil, errors.New("not a terminal")
-	}
-	if tty.saved, err = term.GetState(tty.fd); err != nil {
-		return nil, fmt.Errorf("failed to get state: %w", err)
-	}
-	return tty, nil
-}
+func NewStdIoTty() (Tty, error) { _ = "STUB: not implemented"; return *new(Tty), nil }

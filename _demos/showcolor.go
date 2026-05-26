@@ -24,7 +24,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
@@ -42,44 +41,9 @@ var redi = int32(inc)
 var grni = int32(inc)
 var blui = int32(inc)
 
-func makebox(s tcell.Screen, name string, fill color.Color) {
-	w, h := s.Size()
+func makebox(s tcell.Screen, name string, fill color.Color) { _ = "STUB: not implemented"; return }
 
-	if w == 0 || h == 0 {
-		return
-	}
-
-	lh := h - 3
-	lw := w
-	lx := 0
-	ly := 0
-	st := tcell.StyleDefault
-
-	s.Fill(' ', st)
-	bg := st.Background(fill)
-	for row := 0; row < lh; row++ {
-		for col := 0; col < lw; col++ {
-			s.Put(lx+col, ly+row, " ", bg)
-		}
-	}
-	cn := fill.Name()
-	if cn == "" {
-		cn = "rgb"
-	}
-	msg := fmt.Sprintf("This is %s (#%06x, %s). Terminal supports %d colors.", name, fill.Hex(), cn, s.Colors())
-	if len(msg) < w {
-		lx = (w - len(msg)) / 2
-	} else {
-		lx = 0
-	}
-	s.PutStrStyled(lx, lh+1, msg, st)
-	s.Show()
-}
-
-func fatal(v string, args ...any) {
-	fmt.Fprintf(os.Stderr, v+"\n", args...)
-	os.Exit(1)
-}
+func fatal(v string, args ...any) { _ = "STUB: not implemented"; return }
 
 func main() {
 

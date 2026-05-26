@@ -29,26 +29,14 @@ const (
 	blinkingCursor = CursorStyle(1 << 6) // If set, cursor should blink
 )
 
-func (cs CursorStyle) IsVisible() bool {
-	return cs&hiddenCursor == 0
-}
+func (cs CursorStyle) IsVisible() bool { _ = "STUB: not implemented"; return false }
 
-func (cs CursorStyle) IsBlinking() bool {
-	return cs&blinkingCursor != 0
-}
+func (cs CursorStyle) IsBlinking() bool { _ = "STUB: not implemented"; return false }
 
-func (cs CursorStyle) Hide() CursorStyle {
-	return cs | hiddenCursor
-}
+func (cs CursorStyle) Hide() CursorStyle { _ = "STUB: not implemented"; return *new(CursorStyle) }
 
-func (cs CursorStyle) Show() CursorStyle {
-	return cs &^ hiddenCursor
-}
+func (cs CursorStyle) Show() CursorStyle { _ = "STUB: not implemented"; return *new(CursorStyle) }
 
-func (cs CursorStyle) Blink() CursorStyle {
-	return cs | blinkingCursor
-}
+func (cs CursorStyle) Blink() CursorStyle { _ = "STUB: not implemented"; return *new(CursorStyle) }
 
-func (cs CursorStyle) Steady() CursorStyle {
-	return cs &^ blinkingCursor
-}
+func (cs CursorStyle) Steady() CursorStyle { _ = "STUB: not implemented"; return *new(CursorStyle) }

@@ -18,13 +18,4 @@
 package tcell
 
 // initialize on Plan 9: if no TTY was provided, use the Plan 9 TTY.
-func (t *tScreen) initialize() error {
-	if t.tty == nil {
-		tty, err := NewDevTty()
-		if err != nil {
-			return err
-		}
-		t.tty = tty
-	}
-	return nil
-}
+func (t *tScreen) initialize() error { _ = "STUB: not implemented"; return nil }

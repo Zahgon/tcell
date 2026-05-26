@@ -39,59 +39,9 @@ var grni = int32(inc)
 var blui = int32(inc)
 var interval = time.Millisecond * 50
 
-func makeBox(s tcell.Screen) {
-	w, h := s.Size()
+func makeBox(s tcell.Screen) { _ = "STUB: not implemented"; return }
 
-	if w == 0 || h == 0 {
-		return
-	}
-
-	glyphs := []string{"@", "#", "&", "*", "=", "%", "Z", "A"}
-
-	lh := h / 2
-	lw := w / 2
-	lx := w / 4
-	ly := h / 4
-	st := tcell.StyleDefault
-	gl := " "
-
-	if s.Colors() == 0 {
-		st = st.Reverse(rand.Int()%2 == 0)
-		gl = glyphs[rand.Int()%len(glyphs)]
-	} else {
-
-		red += redi
-		if (red >= 256) || (red < 0) {
-			redi = -redi
-			red += redi
-		}
-		grn += grni
-		if (grn >= 256) || (grn < 0) {
-			grni = -grni
-			grn += grni
-		}
-		blu += blui
-		if (blu >= 256) || (blu < 0) {
-			blui = -blui
-			blu += blui
-
-		}
-		st = st.Background(tcell.NewRGBColor(red, grn, blu))
-	}
-	for row := range lh {
-		for col := range lw {
-			s.Put(lx+col, ly+row, gl, st)
-		}
-	}
-	s.Show()
-}
-
-func flipCoin() bool {
-	if rand.Int()&1 == 0 {
-		return false
-	}
-	return true
-}
+func flipCoin() bool { _ = "STUB: not implemented"; return false }
 
 func main() {
 

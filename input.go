@@ -28,14 +28,8 @@
 package tcell
 
 import (
-	"encoding/base64"
-	"os"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
-	"unicode/utf16"
-	"unicode/utf8"
 
 	"github.com/gdamore/tcell/v3/vt"
 )
@@ -63,13 +57,7 @@ const (
 // before they can grow without bound while waiting for a string terminator.
 const defaultControlStringLimit = 64 * 1024
 
-func newInputParser(eq chan<- Event) *inputParser {
-	return &inputParser{
-		evch:             eq,
-		buf:              make([]rune, 0, 128),
-		controlStringMax: defaultControlStringLimit,
-	}
-}
+func newInputParser(eq chan<- Event) *inputParser { _ = "STUB: not implemented"; return nil }
 
 type inputParser struct {
 	buf              []rune       // bytes to process (ingest data)
@@ -95,26 +83,11 @@ type inputParser struct {
 	discardString    bool         // drop the rest of an over-limit OSC/XDA sequence
 }
 
-func keyFromInt(n int) (Key, bool) {
-	if n < 0 || n > 32767 {
-		return 0, false
-	}
-	return Key(n), true
-}
+func keyFromInt(n int) (Key, bool) { _ = "STUB: not implemented"; return *new(Key), false }
 
-func keyFromRune(r rune) (Key, bool) {
-	if r < 0 || r > 32767 {
-		return 0, false
-	}
-	return Key(r), true
-}
+func keyFromRune(r rune) (Key, bool) { _ = "STUB: not implemented"; return *new(Key), false }
 
-func asciiByteFromInt(n int) (byte, bool) {
-	if n <= 0 || n >= 0x80 {
-		return 0, false
-	}
-	return byte(n), true
-}
+func asciiByteFromInt(n int) (byte, bool) { _ = "STUB: not implemented"; return 0, false }
 
 // Waiting returns true if the processor is waiting for
 // some more input (i.e. we are not in in the initial state.)
@@ -123,82 +96,32 @@ func asciiByteFromInt(n int) (byte, bool) {
 // inter-key delay before the next stroke occurs, and the caller
 // should check for waiting, and call Scan() or ScanUTF8() to
 // finish the processing.  (Typically after a delay of around 100ms.)
-func (ip *inputParser) Waiting() bool {
-	ip.l.Lock()
-	defer ip.l.Unlock()
-	return ip.state != istInit
-}
+func (ip *inputParser) Waiting() bool { _ = "STUB: not implemented"; return false }
 
 // SetPixelMouse toggles whether SGR mouse reports are interpreted as
 // pixel coordinates (CSI ?1016h) rather than character cells (CSI ?1006h).
 // When enabled, mouse coordinates are not clipped to the screen size.
 // The setting is also forwarded to the lazily-created nested parser used
 // for win32-input-mode, if one exists, so both stay in sync.
-func (ip *inputParser) SetPixelMouse(on bool) {
-	ip.l.Lock()
-	ip.pixelMouse = on
-	nested := ip.nested
-	ip.l.Unlock()
-	if nested != nil {
-		nested.SetPixelMouse(on)
-	}
-}
+func (ip *inputParser) SetPixelMouse(on bool) { _ = "STUB: not implemented"; return }
 
-func (ip *inputParser) SetSize(w, h int) {
-	if ip.nested != nil {
-		ip.nested.SetSize(w, h)
-		return
-	}
-	go func() {
-		ip.l.Lock()
-		ip.rows = h
-		ip.cols = w
-		ip.post(NewEventResize(w, h))
-		ip.l.Unlock()
-	}()
-}
-func (ip *inputParser) post(ev Event) {
-	if ip.escaped {
-		ip.escaped = false
-		if ke, ok := ev.(*EventKey); ok {
-			ev = ip.newKey(ke.Key(), ke.Str(), ke.Modifiers()|ModAlt, ke.Pressed(), ke.Physical(), ke.Repeat())
-		}
-	} else if ke, ok := ev.(*EventKey); ok {
-		switch ke.Key() {
-		case keyPasteStart:
-			ev = NewEventPaste(true)
-		case keyPasteEnd:
-			ev = NewEventPaste(false)
-		}
-	}
+func (ip *inputParser) SetSize(w, h int) { _ = "STUB: not implemented"; return }
 
-	ip.evch <- ev
-}
+func (ip *inputParser) post(ev Event) { _ = "STUB: not implemented"; return }
 
 func (ip *inputParser) newKey(k Key, str string, mod ModMask, pressed bool, physical Key, repeat int) *EventKey {
-	if ip.advanced {
-		return NewEventKeyEx(k, str, mod, pressed, physical, repeat)
-	}
-	return NewEventKey(k, str, mod)
+	_ = "STUB: not implemented"
+	return nil
 }
 
-func (ip *inputParser) postKey(k Key, str string, mod ModMask) {
-	ip.post(ip.newKey(k, str, mod, true, 0, 1))
-}
+func (ip *inputParser) postKey(k Key, str string, mod ModMask) { _ = "STUB: not implemented"; return }
 
 func (ip *inputParser) postKeyEx(k Key, str string, mod ModMask, pressed bool, physical Key, repeat int) {
-	ip.post(ip.newKey(k, str, mod, pressed, physical, repeat))
+	_ = "STUB: not implemented"
+	return
 }
 
-func (ip *inputParser) postControlKey(r rune, mod ModMask) {
-	if r == 0 {
-		ip.postKeyEx(KeyRune, " ", mod|ModCtrl, true, Key(' '), 1)
-	} else if ip.advanced && r >= 1 && r <= 26 {
-		ip.postKeyEx(KeyRune, string('a'+r-1), mod|ModCtrl, true, Key('a'+r-1), 1)
-	} else {
-		ip.postKey(KeyRune, string(r+0x40), mod|ModCtrl)
-	}
-}
+func (ip *inputParser) postControlKey(r rune, mod ModMask) { _ = "STUB: not implemented"; return }
 
 type csiParamMode struct {
 	M rune // Mode
@@ -517,515 +440,160 @@ var linuxFKeys = map[rune]Key{
 	'E': KeyF5,
 }
 
-func (ip *inputParser) scan() {
-	for _, r := range ip.buf {
-		ip.buf = ip.buf[1:]
-		ip.escChar = 0
-		ip.keyTime = time.Now()
-		if r >= 0xA0 {
-			// 8-bit extended Unicode we just treat as such - this will swallow anything else queued up
-			ip.state = istInit
-			physical, _ := keyFromRune(r)
-			ip.postKeyEx(KeyRune, string(r), ModNone, true, physical, 1)
-			continue
-		} else if r >= 0x80 {
-			// ISO 2022 control chars
-			ip.state = istEsc
-			r -= 0x40
-			// we fall through so it will be treated as the 7-bit equivalent
-		}
-		switch ip.state {
-		case istInit:
-			switch r {
-			case '\x1b':
-				// escape.. pending
-				ip.state = istEsc
-				ip.escChar = 0
-			case '\t':
-				ip.postKey(KeyTab, "", ModNone)
-			case '\b', '\x7F':
-				ip.postKey(KeyBackspace, "", ModNone)
-			case '\r':
-				ip.postKey(KeyEnter, "", ModNone)
-			default:
-				// Control keys - legacy handling
-				if r == 0 {
-					ip.postControlKey(r, ModNone)
-				} else if r < ' ' {
-					ip.postControlKey(r, ModNone)
-				} else {
-					physical, _ := keyFromRune(r)
-					ip.postKeyEx(KeyRune, string(r), ModNone, true, physical, 1)
-				}
-			}
-		case istEsc:
-			switch r {
-			case '[':
-				ip.state = istCsi
-				ip.csiInterm = nil
-				ip.csiParams = nil
-				ip.escChar = byte(r)
-			case ']':
-				ip.state = istOsc
-				ip.strBuf = nil
-				ip.discardString = false
-				ip.escChar = byte(r)
-			case 'N':
-				ip.state = istSs2 // no known uses
-				ip.strBuf = nil
-				ip.escChar = byte(r)
-			case 'O':
-				ip.state = istSs3
-				ip.csiParams = nil
-				ip.strBuf = nil
-				ip.escChar = byte(r)
-			case 'P':
-				ip.state = istXda
-				ip.csiParams = nil
-				ip.strBuf = nil
-				ip.discardString = false
-				ip.escChar = byte(r)
-			case 'X':
-				ip.state = istSos
-				ip.strBuf = nil
-				ip.escChar = byte(r)
-			case '^':
-				ip.state = istPm
-				ip.strBuf = nil
-				ip.escChar = byte(r)
-			case '_':
-				ip.state = istApc
-				ip.strBuf = nil
-				ip.escChar = byte(r)
-			case '\\':
-				// string terminator reached, (orphaned?)
-				ip.state = istInit
-			case '\t':
-				// Linux console only, does not conform to ECMA
-				ip.state = istInit
-				ip.postKey(KeyBacktab, "", ModNone)
-			default:
-				if r == '\x1b' {
-					// leading ESC to capture alt
-					ip.escaped = true
-					ip.escChar = byte(r)
-				} else {
-					// treat as alt-key ... legacy emulators only (no CSI-u or other)
-					ip.state = istInit
-					mod := ModAlt
-					if r < ' ' {
-						mod |= ModCtrl
-						r += 0x60
-					}
-					physical, _ := keyFromRune(r)
-					ip.postKeyEx(KeyRune, string(r), mod, true, physical, 1)
-				}
-			}
-		case istCsi:
-			// usual case for incoming keys
-			// NB: rxvt uses terminating '$' which is not a legal CSI terminator,
-			// for certain shifted key sequences.  We special case this, and it's ok
-			// because no other terminal seems to use this for CSI intermediates from
-			// the terminal to the host (queries in the other direction can use it.)
-			// However, this is only true if the first parameter does not have a "?",
-			// because it *does* collide with DEC private mode queries otherwise.
-			if r == '\x1b' {
-				// Per ECMA-48 §5.3.1, ESC restarts the escape
-				// sequence machine from any intermediate state.
-				ip.state = istEsc
-				ip.escChar = 0
-			} else if r >= 0x30 && r <= 0x3F { // parameter bytes
-				ip.csiParams = append(ip.csiParams, byte(r))
-			} else if r == '$' && len(ip.csiParams) > 0 && ip.csiParams[0] != '?' { // rxvt non-standard
-				ip.handleCsi(r, ip.csiParams, ip.csiInterm)
-			} else if r >= 0x20 && r <= 0x2F { // intermediate bytes, rarely used
-				ip.csiInterm = append(ip.csiInterm, byte(r))
-			} else if r >= 0x40 && r <= 0x7F { // final byte
-				ip.handleCsi(r, ip.csiParams, ip.csiInterm)
-			} else {
-				// bad parse, just swallow it all
-				ip.state = istInit
-			}
-		case istSs2:
-			// No known uses for SS2
-			ip.state = istInit
+func (ip *inputParser) scan() { _ = "STUB: not implemented"; return }
 
-		case istSs3: // typically application mode keys or older terminals
-			ip.state = istInit
-			// some SS3 sequences (old VTE) encode modifiers here just like CSI
-			if r == '\x1b' {
-				// Per ECMA-48 §5.3.1, ESC restarts the escape
-				// sequence machine from any intermediate state.
-				ip.state = istEsc
-				ip.escChar = 0
-			} else if r >= 0x30 && r <= 0x3F {
-				ip.csiParams = append(ip.csiParams, byte(r))
-				ip.state = istSs3
-			} else if k, ok := ss3Keys[r]; ok {
-				// If there are no parameters, then it's simple without modifiers.
-				// The options for parameters are "1;<modifiers>" , or ";modifiers" (empty
-				// first parameter defaults to 1), or just <modifiers>.  If a sequence has
-				// parameters that do not match one of these forms, we just discard it.
-				if len(ip.csiParams) == 0 {
-					// simple SS3 case
-					ip.postKey(k, "", ModNone)
-				} else if parts := strings.Split(string(ip.csiParams), ";"); len(parts) >= 1 {
-					// SS3 with modifier (old style).  Note old terminfo would declare these as high
-					// numbered function keys, but we encode as modified since that's how they are entered.
-					if len(parts) >= 2 {
-						if m, err := strconv.Atoi(parts[1]); err == nil && (parts[0] == "1" || parts[0] == "") {
-							ip.postKey(k, "", calcModifier(m))
-						}
-					} else if m, err := strconv.Atoi(parts[0]); err == nil {
-						ip.postKey(k, "", calcModifier(m))
-					}
-				}
-			}
+// 8-bit extended Unicode we just treat as such - this will swallow anything else queued up
 
-		case istPm, istApc, istSos, istDcs: // these we just eat
-			switch r {
-			case '\x1b':
-				ip.strState = ip.state
-				ip.state = istSt
-			case '\x07': // bell - some send this instead of ST
-				ip.state = istInit
-			}
+// ISO 2022 control chars
 
-		case istXda:
-			switch r {
-			case '\x1b':
-				ip.strState = ip.state
-				ip.state = istSt
-			case '\x07':
-				if ip.discardString {
-					ip.discardString = false
-					ip.state = istInit
-				} else {
-					ip.handleXda(string(ip.strBuf))
-				}
-			default:
-				if !ip.discardString {
-					ip.appendStringBytes(byte(r & 0x7f))
-				}
-			}
+// we fall through so it will be treated as the 7-bit equivalent
 
-		case istOsc: // not sure if used
-			switch r {
-			case '\x1b':
-				ip.strState = ip.state
-				ip.state = istSt
-			case '\x07':
-				if ip.discardString {
-					ip.discardString = false
-					ip.state = istInit
-				} else {
-					ip.handleOsc(string(ip.strBuf))
-				}
-			default:
-				if !ip.discardString {
-					ip.appendStringBytes(byte(r & 0x7f))
-				}
-			}
-		case istSt:
-			if r == '\\' || r == '\x07' {
-				ip.state = istInit
-				if ip.discardString {
-					ip.discardString = false
-				} else {
-					switch ip.strState {
-					case istOsc:
-						ip.handleOsc(string(ip.strBuf))
-					case istXda:
-						ip.handleXda(string(ip.strBuf))
-					case istPm, istApc, istSos, istDcs:
-						ip.state = istInit
-					}
-				}
-			} else {
-				if !ip.discardString {
-					ip.appendStringBytes('\x1b', byte(r))
-				}
-				ip.state = ip.strState
-			}
-		case istLnx:
-			// linux console does not follow ECMA
-			if k, ok := linuxFKeys[r]; ok {
-				ip.postKey(k, "", ModNone)
-			}
-			ip.state = istInit
-		}
-	}
+// escape.. pending
 
-	if ip.state != istInit && time.Since(ip.keyTime) > time.Millisecond*50 {
-		if ip.state == istEsc {
-			ip.postKey(KeyEscape, "", ModNone)
-		} else if ec := ip.escChar; ec != 0 {
-			ip.postKey(KeyRune, string(ec), ModAlt)
-		}
-		// if we take too long between bytes, reset the state machine.
-		ip.state = istInit
-		ip.discardString = false
-	}
-}
+// Control keys - legacy handling
 
-func (ip *inputParser) appendStringBytes(bs ...byte) {
-	if ip.controlStringMax > 0 && len(ip.strBuf)+len(bs) > ip.controlStringMax {
-		ip.strBuf = nil
-		ip.discardString = true
-		return
-	}
-	ip.strBuf = append(ip.strBuf, bs...)
-}
+// no known uses
 
-func (ip *inputParser) handleOsc(str string) {
-	ip.state = istInit
-	if content, ok := strings.CutPrefix(str, "52;c;"); ok {
-		decoded := make([]byte, base64.StdEncoding.DecodedLen(len(content)))
-		if count, err := base64.StdEncoding.Decode(decoded, []byte(content)); err == nil {
-			ip.post(NewEventClipboard(decoded[:count]))
-			return
-		}
-	}
-}
+// string terminator reached, (orphaned?)
 
-func (ip *inputParser) handleXda(str string) {
-	ip.state = istInit
-	if content, ok := strings.CutPrefix(str, ">|"); ok {
-		// two approaches, one with version like (1.23) another with just spaces
-		if name, vers, ok := strings.Cut(content, "("); ok && strings.HasSuffix(vers, ")") {
-			name = strings.TrimSpace(name)
-			vers = strings.TrimSpace(strings.TrimSuffix(vers, ")"))
-			ip.post(&eventTermName{Name: name, Version: vers})
-		} else if name, vers, ok = strings.Cut(content, " "); ok {
-			ip.post(&eventTermName{Name: name, Version: vers})
-		}
-	}
-}
+// Linux console only, does not conform to ECMA
 
-func calcModifier(n int) ModMask {
-	n--
-	m := ModNone
-	if n&1 != 0 {
-		m |= ModShift
-	}
-	if n&2 != 0 {
-		m |= ModAlt
-	}
-	if n&4 != 0 {
-		m |= ModCtrl
-	}
-	if n&8 != 0 {
-		m |= ModMeta // kitty calls this Super
-	}
-	if n&16 != 0 {
-		m |= ModHyper
-	}
-	if n&32 != 0 {
-		m |= ModMeta // for now not separating from Super
-	}
-	// Not doing (kitty only):
-	// caps_lock 0b1000000   (64)
-	// num_lock  0b10000000  (128)
+// leading ESC to capture alt
 
-	return m
-}
+// treat as alt-key ... legacy emulators only (no CSI-u or other)
 
-func calcWinModifier(n int, advanced bool) ModMask {
-	m := ModNone
-	if n&0x010 != 0 {
-		m |= ModShift
-	}
-	if advanced {
-		// Bits through 0x0100 match Win32 dwControlKeyState. 0x0040 and
-		// 0x0080 are ScrollLock and CapsLock, not Meta. The 0x0200 and
-		// 0x0400 bits are tcell extensions used by the WASM browser shim,
-		// which has Meta keys but no native Win32 bit assignment for them.
-		if n&0x0008 != 0 {
-			m |= ModLCtrl
-		}
-		if n&0x0004 != 0 {
-			m |= ModRCtrl
-		}
-		if n&0x0002 != 0 {
-			m |= ModLAlt
-		}
-		if n&0x0001 != 0 {
-			m |= ModRAlt
-		}
-		if n&0x0200 != 0 {
-			m |= ModLMeta
-		}
-		if n&0x0400 != 0 {
-			m |= ModRMeta
-		}
-	} else {
-		if n&0x000c != 0 {
-			m |= ModCtrl
-		}
-		if n&0x0003 != 0 {
-			m |= ModAlt
-		}
-	}
-	return m
-}
+// usual case for incoming keys
+// NB: rxvt uses terminating '$' which is not a legal CSI terminator,
+// for certain shifted key sequences.  We special case this, and it's ok
+// because no other terminal seems to use this for CSI intermediates from
+// the terminal to the host (queries in the other direction can use it.)
+// However, this is only true if the first parameter does not have a "?",
+// because it *does* collide with DEC private mode queries otherwise.
+
+// Per ECMA-48 §5.3.1, ESC restarts the escape
+// sequence machine from any intermediate state.
+
+// parameter bytes
+
+// rxvt non-standard
+
+// intermediate bytes, rarely used
+
+// final byte
+
+// bad parse, just swallow it all
+
+// No known uses for SS2
+
+// typically application mode keys or older terminals
+
+// some SS3 sequences (old VTE) encode modifiers here just like CSI
+
+// Per ECMA-48 §5.3.1, ESC restarts the escape
+// sequence machine from any intermediate state.
+
+// If there are no parameters, then it's simple without modifiers.
+// The options for parameters are "1;<modifiers>" , or ";modifiers" (empty
+// first parameter defaults to 1), or just <modifiers>.  If a sequence has
+// parameters that do not match one of these forms, we just discard it.
+
+// simple SS3 case
+
+// SS3 with modifier (old style).  Note old terminfo would declare these as high
+// numbered function keys, but we encode as modified since that's how they are entered.
+
+// these we just eat
+
+// bell - some send this instead of ST
+
+// not sure if used
+
+// linux console does not follow ECMA
+
+// if we take too long between bytes, reset the state machine.
+
+func (ip *inputParser) appendStringBytes(bs ...byte) { _ = "STUB: not implemented"; return }
+
+func (ip *inputParser) handleOsc(str string) { _ = "STUB: not implemented"; return }
+
+func (ip *inputParser) handleXda(str string) { _ = "STUB: not implemented"; return }
+
+// two approaches, one with version like (1.23) another with just spaces
+
+func calcModifier(n int) ModMask { _ = "STUB: not implemented"; return *new(ModMask) }
+
+// kitty calls this Super
+
+// for now not separating from Super
+
+// Not doing (kitty only):
+// caps_lock 0b1000000   (64)
+// num_lock  0b10000000  (128)
+
+func calcWinModifier(n int, advanced bool) ModMask { _ = "STUB: not implemented"; return *new(ModMask) }
+
+// Bits through 0x0100 match Win32 dwControlKeyState. 0x0040 and
+// 0x0080 are ScrollLock and CapsLock, not Meta. The 0x0200 and
+// 0x0400 bits are tcell extensions used by the WASM browser shim,
+// which has Meta keys but no native Win32 bit assignment for them.
 
 func winModifierKey(vk int) (Key, ModMask, bool) {
-	switch vk {
-	case 0x10:
-		return KeyShift, ModShift, true
-	case 0xa0:
-		return KeyShift, ModLShift, true
-	case 0xa1:
-		return KeyShift, ModRShift, true
-	case 0x11:
-		return KeyCtrl, ModCtrl, true
-	case 0xa2:
-		return KeyCtrl, ModLCtrl, true
-	case 0xa3:
-		return KeyCtrl, ModRCtrl, true
-	case 0x12:
-		return KeyAlt, ModAlt, true
-	case 0xa4:
-		return KeyAlt, ModLAlt, true
-	case 0xa5:
-		return KeyAlt, ModRAlt, true
-	case 0x5b:
-		return KeyMeta, ModLMeta, true
-	case 0x5c:
-		return KeyMeta, ModRMeta, true
-	case 0x14:
-		return KeyCapsLock, ModNone, true
-	default:
-		return 0, ModNone, false
-	}
+	_ = "STUB: not implemented"
+	return *new(Key), *new(ModMask), false
 }
 
-func kittyModifierKey(code int) ModMask {
-	switch code {
-	case 57441:
-		return ModLShift
-	case 57447:
-		return ModRShift
-	case 57442:
-		return ModLCtrl
-	case 57448:
-		return ModRCtrl
-	case 57443:
-		return ModLAlt
-	case 57449:
-		return ModRAlt
-	case 57444:
-		return ModLMeta
-	case 57450:
-		return ModRMeta
-	default:
-		return ModNone
-	}
-}
+func kittyModifierKey(code int) ModMask { _ = "STUB: not implemented"; return *new(ModMask) }
 
 func (ip *inputParser) handleMouse(mode rune, params []int) {
+	_ = "STUB: not implemented"
 
 	// XTerm mouse events only report at most one button at a time,
 	// which may include a wheel button.  Wheel motion events are
 	// reported as single impulses, while other button events are reported
 	// as separate press & release events.
-	if len(params) < 3 {
-		return
-	}
-	btn := params[0]
-	// Some terminals will report mouse coordinates outside the
-	// screen, especially with click-drag events.  Clip the coordinates
-	// to the screen in that case.  In pixel-reporting mode (CSI ?1016h)
-	// the values are already pixels rather than cells, so skip the clip
-	// and pass them through unchanged for the application to interpret.
-	x := params[1] - 1
-	y := params[2] - 1
-	if !ip.pixelMouse {
-		x = max(min(x, ip.cols-1), 0)
-		y = max(min(y, ip.rows-1), 0)
-	}
-
-	button := ButtonNone
-	mod := ModNone
-
-	// Mouse wheel has bit 6 set, no release events.  It should be noted
-	// that wheel events are sometimes misdelivered as mouse button events
-	// during a click-drag, so we debounce these, considering them to be
-	// button press events unless we see an intervening release event.
-	// This excludes motion (bit 5) and modifiers (bits 2, 3, 4) for now.
-	switch btn & 0xC3 {
-	case 0:
-		button = Button1
-	case 1:
-		button = Button3 // Note we prefer to treat right as button 2
-	case 2:
-		button = Button2 // And the middle button as button 3
-	case 3:
-		button = ButtonNone
-	case 0x40:
-		button = WheelUp
-	case 0x41:
-		button = WheelDown
-	case 0x42:
-		button = WheelLeft
-	case 0x43:
-		button = WheelRight
-	case 0x80:
-		button = Button4
-	case 0x81:
-		button = Button5
-	case 0x82:
-		button = Button6
-	case 0x83:
-		button = Button7
-	}
-
-	switch mode {
-	case 'm':
-		if (ip.btnsDown & button) == 0 {
-			// a release without a corresponding press, so clear it
-			button = ButtonNone
-		} else {
-			ip.btnsDown &^= button
-			button = ip.btnsDown
-		}
-
-	case 'M':
-		if btn&0x20 != 0 && button != ButtonNone && (ip.btnsDown&button) == 0 {
-			// Ghostty may send out motion signals that indicate a button has
-			// been pressed, even when the button is not actually pressed.
-			// Do not create a synthetic button-down state from these packets.
-			button = ip.btnsDown
-			break
-		}
-		// record this press
-		ip.btnsDown |= button
-		// and use the full set so can see chords
-		button = ip.btnsDown
-		// mice wheel do not have release events
-		ip.btnsDown &^= (WheelDown | WheelUp | WheelLeft | WheelRight)
-	}
-
-	if btn&0x4 != 0 {
-		mod |= ModShift
-	}
-	if btn&0x8 != 0 {
-		mod |= ModAlt
-	}
-	if btn&0x10 != 0 {
-		mod |= ModCtrl
-	}
-
-	ip.post(NewEventMouse(x, y, button, mod))
+	return
 }
 
+// Some terminals will report mouse coordinates outside the
+// screen, especially with click-drag events.  Clip the coordinates
+// to the screen in that case.  In pixel-reporting mode (CSI ?1016h)
+// the values are already pixels rather than cells, so skip the clip
+// and pass them through unchanged for the application to interpret.
+
+// Mouse wheel has bit 6 set, no release events.  It should be noted
+// that wheel events are sometimes misdelivered as mouse button events
+// during a click-drag, so we debounce these, considering them to be
+// button press events unless we see an intervening release event.
+// This excludes motion (bit 5) and modifiers (bits 2, 3, 4) for now.
+
+// Note we prefer to treat right as button 2
+
+// And the middle button as button 3
+
+// a release without a corresponding press, so clear it
+
+// Ghostty may send out motion signals that indicate a button has
+// been pressed, even when the button is not actually pressed.
+// Do not create a synthetic button-down state from these packets.
+
+// record this press
+
+// and use the full set so can see chords
+
+// mice wheel do not have release events
+
 func (ip *inputParser) handleWinKey(P []int) {
+	_ = "STUB: not implemented"
 	// win32-input-mode
-	//  ^[ [ Vk ; Sc ; Uc ; Kd ; Cs ; Rc _
+	//
+	//	^[ [ Vk ; Sc ; Uc ; Kd ; Cs ; Rc _
+	//
 	// Vk: the value of wVirtualKeyCode - any number. If omitted, defaults to '0'.
 	// Sc: the value of wVirtualScanCode - any number. If omitted, defaults to '0'.
 	// Uc: the decimal value of UnicodeChar - for example, NUL is "0", LF is
-	//     "10", the character 'A' is "65". If omitted, defaults to '0'.
+	//
+	//	"10", the character 'A' is "65". If omitted, defaults to '0'.
+	//
 	// Kd: the value of bKeyDown - either a '0' or '1'. If omitted, defaults to '0'.
 	// Cs: the value of dwControlKeyState - any number. If omitted, defaults to '0'.
 	// Rc: the value of wRepeatCount - any number. If omitted, defaults to '1'.
@@ -1036,433 +604,80 @@ func (ip *inputParser) handleWinKey(P []int) {
 	// sequences.)  We consider this a bug in those terminal emulators -- Windows 11
 	// Terminal does not suffer this brain damage. (We've observed this with both Alacritty
 	// and WezTerm.)
-	for len(P) < 6 {
-		P = append(P, 0) // ensure sufficient length
-	}
-	if P[3] == 0 && !ip.advanced {
-		// key up event ignore ignore
-		return
-	}
-
-	// these terminals never send ambiguous escapes
-	ip.escaped = false
-
-	if P[0] == 0 && P[1] == 0 { // only ASCII in win32-input-mode
-		if b, ok := asciiByteFromInt(P[2]); ok {
-			if ip.nested == nil {
-				ip.nested = &inputParser{
-					evch:             ip.evch,
-					rows:             ip.rows,
-					cols:             ip.cols,
-					advanced:         ip.advanced,
-					pixelMouse:       ip.pixelMouse,
-					controlStringMax: ip.controlStringMax,
-				}
-			}
-			ip.nested.ScanUTF8([]byte{b})
-			return
-		}
-	}
-
-	key := KeyRune
-	chr := rune(P[2])
-	mod := ModNone
-	rpt := max(1, P[5])
-	decoded := false
-	if k1, ok := winKeys[P[0]]; ok {
-		chr = 0
-		key = k1
-		decoded = true
-	} else if ip.advanced {
-		if k1, mod1, ok := winModifierKey(P[0]); ok {
-			key = k1
-			mod = mod1
-			chr = 0
-			decoded = true
-		}
-	}
-	if decoded {
-		// Already decoded.
-	} else if chr == 0 && P[0] >= 0x30 && P[0] <= 0x39 {
-		chr = rune(P[0])
-	} else if chr < ' ' && P[0] >= 0x41 && P[0] <= 0x5a {
-		if ip.advanced {
-			key = KeyRune
-			chr = rune(P[0] + 0x20)
-		} else {
-			var ok bool
-			if key, ok = keyFromInt(P[0]); !ok {
-				return
-			}
-			chr = 0
-		}
-	} else if chr >= 0xD800 && chr <= 0xDBFF {
-		// high surrogate pair
-		if ip.surrogate != 0 {
-			ip.postKeyEx(KeyRune, string(utf8.RuneError), mod, P[3] != 0, 0, rpt)
-		}
-		ip.surrogate = chr
-		return
-	} else if chr >= 0xDC00 && chr <= 0xDFFF {
-		// low surrogate pair
-		if ip.surrogate == 0 {
-			chr = utf8.RuneError
-		} else {
-			chr = utf16.DecodeRune(ip.surrogate, chr)
-		}
-	} else if ip.surrogate != 0 {
-		ip.postKeyEx(KeyRune, string(utf8.RuneError), mod, P[3] != 0, 0, rpt)
-	} else if _, _, ok := winModifierKey(P[0]); ok {
-		// Lone modifier releases are ignored unless advanced mode is enabled.
-		ip.surrogate = 0
-		return
-	}
-
-	ip.surrogate = 0
-
-	mod |= calcWinModifier(P[4], ip.advanced)
-	if key == KeyRune && chr > ' ' && mod == ModShift && !ip.advanced {
-		// filter out lone shift for printable chars
-		mod = ModNone
-	}
-	if chr != 0 && mod&(ModCtrl|ModAlt) == ModCtrl|ModAlt {
-		// Filter out ctrl+alt (it means AltGr)
-		mod = ModNone
-	}
-
-	physical := key
-	if key == KeyRune && chr != 0 {
-		physical, _ = keyFromRune(chr)
-		if ip.advanced && P[0] >= 0x41 && P[0] <= 0x5a {
-			physical, _ = keyFromInt(P[0] + 0x20)
-		}
-	}
-	if key != KeyRune {
-		ip.postKeyEx(key, "", mod, P[3] != 0, physical, rpt)
-	} else if chr != 0 {
-		ip.postKeyEx(KeyRune, string(chr), mod, P[3] != 0, physical, rpt)
-	}
+	return
 }
 
-func (ip *inputParser) handlePrimaryDA(params []int) {
-	if len(params) < 1 {
-		return
-	}
-	evDA := &eventPrimaryAttributes{Class: params[0]}
-	params = params[1:]
-	if evDA.Class >= 60 {
-		for _, v := range params {
-			switch v {
-			case 3:
-				evDA.ReGIS = true
-			case 4:
-				evDA.Sixel = true
-			case 9:
-				evDA.National = true
-			case 12:
-				evDA.SerboCroation = true
-			case 22:
-				evDA.Color = true
-			case 23:
-				evDA.Greek = true
-			case 24:
-				evDA.Turkish = true
-			case 42:
-				evDA.Latin2 = true
-			case 52:
-				evDA.Clipboard = true
-			}
-		}
-	}
-	ip.post(evDA)
-}
+// ensure sufficient length
 
-func (ip *inputParser) handlePrivateModeResponse(params []int) {
-	for len(params) < 2 {
-		params = append(params, 0)
-	}
-	if params[1] >= 0 && params[1] <= 4 {
-		ev := &eventPrivateMode{
-			Mode:   vt.PrivateMode(params[0]),
-			Status: vt.ModeStatus(params[1]),
-		}
-		ip.post(ev)
-	}
-}
+// key up event ignore ignore
 
-func (ip *inputParser) handleKittyMode(params []int) {
-	if len(params) == 1 && params[0] >= 0 && params[0] < 32 {
-		ev := &eventKittyKbdMode{
-			Mode: KittyKbdMode(params[0] & 0xffff),
-		}
-		ip.post(ev)
-	}
-}
+// these terminals never send ambiguous escapes
 
-func (ip *inputParser) handleXTermMode(params []int) {
-	if len(params) >= 1 && params[0] == 4 {
-		if len(params) == 1 {
-			params = append(params, 0)
-		}
-		ev := &eventXTermKbdMode{
-			Mode: XtermKbdMode(params[1] & 0x3),
-		}
-		ip.post(ev)
-	}
-}
+// only ASCII in win32-input-mode
+
+// Already decoded.
+
+// high surrogate pair
+
+// low surrogate pair
+
+// Lone modifier releases are ignored unless advanced mode is enabled.
+
+// filter out lone shift for printable chars
+
+// Filter out ctrl+alt (it means AltGr)
+
+func (ip *inputParser) handlePrimaryDA(params []int) { _ = "STUB: not implemented"; return }
+
+func (ip *inputParser) handlePrivateModeResponse(params []int) { _ = "STUB: not implemented"; return }
+
+func (ip *inputParser) handleKittyMode(params []int) { _ = "STUB: not implemented"; return }
+
+func (ip *inputParser) handleXTermMode(params []int) { _ = "STUB: not implemented"; return }
 
 func (ip *inputParser) handleCsi(mode rune, params []byte, intermediate []byte) {
+	_ = "STUB: not implemented"
 
 	// reset state
-	ip.state = istInit
-
-	var P []int
-	hasLT := false
-	hasQM := false
-	hasGT := false
-	pstr := string(params)
-	// extract numeric parameters
-	if strings.HasPrefix(pstr, "<") {
-		hasLT = true
-		pstr = pstr[1:]
-	} else if strings.HasPrefix(pstr, "?") {
-		hasQM = true
-		pstr = pstr[1:]
-	} else if strings.HasPrefix(pstr, ">") {
-		hasGT = true
-		pstr = pstr[1:]
-	}
-
-	pressed := true
-	repeat := 1
-	physical := Key(0)
-	if pstr != "" && pstr[0] >= '0' && pstr[0] <= '9' {
-		var PSubs [][]int
-
-		parts := strings.Split(pstr, ";")
-		for i := range parts {
-			subparts := strings.Split(parts[i], ":")
-			if subparts[0] != "" {
-				if n, e := strconv.ParseInt(subparts[0], 10, 32); e == nil {
-					P = append(P, int(n))
-				} else {
-					P = append(P, 0)
-				}
-			} else {
-				P = append(P, 0)
-			}
-			subs := []int{}
-			for _, sub := range subparts[1:] {
-				if sub != "" {
-					if n, e := strconv.ParseInt(sub, 10, 32); e == nil {
-						subs = append(subs, int(n))
-					}
-				} else {
-					subs = append(subs, 0)
-				}
-			}
-			PSubs = append(PSubs, subs)
-		}
-		if len(PSubs) > 1 && len(PSubs[1]) > 0 {
-			switch PSubs[1][0] {
-			case 2:
-				repeat = 2
-			case 3:
-				pressed = false
-			}
-		}
-		if len(PSubs) > 0 && len(PSubs[0]) > 0 {
-			base := PSubs[0][0]
-			if baseKey, ok := csiUKeys[base]; ok {
-				physical = baseKey.Key
-				if physical == KeyRune && baseKey.Rune != 0 {
-					physical, _ = keyFromRune(baseKey.Rune)
-				}
-			} else if base != 0 {
-				physical, _ = keyFromInt(base)
-			}
-		}
-	}
-	var P0 int
-	if len(P) > 0 {
-		P0 = P[0]
-	}
-
-	if hasLT && len(intermediate) == 0 {
-		switch mode {
-		case 'm', 'M': // mouse event, we only do SGR tracking
-			ip.handleMouse(mode, P)
-		}
-		return
-	}
-	if hasQM {
-		switch mode {
-		case 'c':
-			if len(intermediate) == 0 {
-				ip.handlePrimaryDA(P)
-			}
-		case 'y':
-			if string(intermediate) == "$" {
-				ip.handlePrivateModeResponse(P)
-			}
-		case 'u':
-			if len(intermediate) == 0 {
-				ip.handleKittyMode(P)
-			}
-		}
-		return
-	}
-	if hasGT {
-		switch mode {
-		case 'm':
-			if len(intermediate) == 0 {
-				ip.handleXTermMode(P)
-			}
-		}
-		return
-	}
-
-	if len(intermediate) != 0 {
-		// we don't know what to do with these for now
-		return
-	}
-
-	switch mode {
-	case 'I': // focus in
-		ip.post(NewEventFocus(true))
-		return
-	case 'O': // focus out
-		ip.post(NewEventFocus(false))
-		return
-	case '[':
-		// linux console F-key - CSI-[ modifies next key
-		ip.state = istLnx
-		return
-	case 'u':
-		// CSI-u kitty keyboard protocol, is unambiguous
-		if len(P) > 0 {
-			mod := ModNone
-			key := KeyRune
-			chr := rune(0)
-			if k1, ok := csiUKeys[P0]; ok {
-				key = k1.Key
-				chr = k1.Rune
-			} else {
-				chr = rune(P0)
-			}
-			if len(P) > 1 {
-				mod = calcModifier(P[1])
-			}
-			if mod1 := kittyModifierKey(P0); mod1 != ModNone {
-				mod |= mod1
-			}
-			if key != KeyRune {
-				ip.postKeyEx(key, "", mod, pressed, physical, repeat)
-			} else if chr != 0 {
-				ip.postKeyEx(KeyRune, string(chr), mod, pressed, physical, repeat)
-			}
-			return
-		}
-	case '_':
-		if len(P) > 0 {
-			ip.handleWinKey(P)
-			return
-		}
-	case 't':
-		if len(P) < 1 {
-			break
-		}
-		switch P[0] {
-		case 8:
-			if len(P) > 2 {
-				// window size report
-				h := P[1]
-				w := P[2]
-				if h != ip.rows || w != ip.cols {
-					ip.SetSize(w, h)
-				}
-				return
-			}
-		case 48:
-			if len(P) > 2 {
-				// window resize report
-				ip.post(NewEventResize(P[2], P[1]))
-				return
-			}
-		}
-	case '~':
-		if len(P) >= 2 {
-			mod := calcModifier(P[1])
-			if ks, ok := csiAllKeys[csiParamMode{M: mode, P: P0}]; ok {
-				ip.postKeyEx(ks.Key, "", mod, pressed, 0, repeat)
-				return
-			}
-			if P0 == 27 && len(P) > 2 && P[2] > 0 && P[2] <= utf8.MaxRune {
-				if P[2] < ' ' || P[2] == 0x7F {
-					if key, ok := keyFromInt(P[2]); ok {
-						ip.postKey(key, "", mod)
-					}
-				} else {
-					physical, _ := keyFromRune(rune(P[2]))
-					ip.postKeyEx(KeyRune, string(rune(P[2])), mod, true, physical, 1)
-				}
-				return
-			}
-		}
-	}
-
-	if ks, ok := csiAllKeys[csiParamMode{M: mode, P: P0}]; ok {
-		if mode == '~' && len(P) > 1 && ks.Mod == ModNone {
-			// apply modifiers if present
-			ks.Mod = calcModifier(P[1])
-		} else if mode == 'P' && os.Getenv("TERM") == "aixterm" {
-			ks.Key = KeyDelete // aixterm hack - conflicts with kitty protocol
-		}
-		ip.postKey(ks.Key, "", ks.Mod)
-		return
-	}
-
-	// this might have been an SS3 style key with modifiers applied
-	if k, ok := ss3Keys[mode]; ok && P0 == 1 && len(P) > 1 {
-		ip.postKeyEx(k, "", calcModifier(P[1]), pressed, 0, repeat)
-		return
-	}
-	// if we got here we just swallow the unknown sequence
+	return
 }
 
-func (ip *inputParser) ScanUTF8(b []byte) {
-	ip.l.Lock()
-	defer ip.l.Unlock()
+// extract numeric parameters
 
-	ip.utfBuf = append(ip.utfBuf, b...)
-	for len(ip.utfBuf) > 0 {
-		// fast path, basic ascii, also includes ISO2022 8-bit controls
-		if ip.utfBuf[0] < 0xA0 {
-			ip.buf = append(ip.buf, rune(ip.utfBuf[0]))
-			ip.utfBuf = ip.utfBuf[1:]
-		} else {
-			r, utfLen := utf8.DecodeRune(ip.utfBuf)
-			if r == utf8.RuneError {
-				// discard the leading byte as bad,
-				// hopefully it will recover.
-				utfLen = 1
-			} else {
-				ip.buf = append(ip.buf, r)
-			}
-			ip.utfBuf = ip.utfBuf[utfLen:]
-		}
-	}
+// mouse event, we only do SGR tracking
 
-	ip.scan()
-}
+// we don't know what to do with these for now
+
+// focus in
+
+// focus out
+
+// linux console F-key - CSI-[ modifies next key
+
+// CSI-u kitty keyboard protocol, is unambiguous
+
+// window size report
+
+// window resize report
+
+// apply modifiers if present
+
+// aixterm hack - conflicts with kitty protocol
+
+// this might have been an SS3 style key with modifiers applied
+
+// if we got here we just swallow the unknown sequence
+
+func (ip *inputParser) ScanUTF8(b []byte) { _ = "STUB: not implemented"; return }
+
+// fast path, basic ascii, also includes ISO2022 8-bit controls
+
+// discard the leading byte as bad,
+// hopefully it will recover.
 
 // Scan scans the existing input, but does not take new content.
 // This is typically called after a delay when Waiting() is true.
-func (ip *inputParser) Scan() {
-	ip.l.Lock()
-	ip.scan()
-	ip.l.Unlock()
-}
+func (ip *inputParser) Scan() { _ = "STUB: not implemented"; return }
 
 // Private events between input and tscreen.
 

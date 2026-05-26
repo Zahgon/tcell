@@ -17,6 +17,4 @@
 
 package tcell
 
-func getCharset() string {
-	return "UTF-8"
-}
+func getCharset() string { _ = "STUB: not implemented"; return "" }
